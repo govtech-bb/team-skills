@@ -2,9 +2,9 @@
 
 ## How a skill works
 
-A skill is a markdown file (`SKILL.md`) with YAML frontmatter that Claude Code loads as instructions. When the user invokes `/bb:<skill-name>`, the contents of that skill's `SKILL.md` are read into the conversation and Claude follows them.
+A skill is a markdown file (`SKILL.md`) with some information formatted using [YAML](https://yaml.org/) that Claude Code loads as instructions. When the user invokes `/bb:<skill-name>`, the contents of that skill's `SKILL.md` are read into the conversation and Claude follows them.
 
-Skills can reference sibling files (other markdown, JSON, examples, etc.) for content that should be independently iterable — see `bb/skills/dev-finish/summary.md` for an example.
+Skills can reference other files (more markdown, JSON, examples, shell scripts etc.) that are useful or part of how the skill works, or that you want to be able to iterate and commit to separately. See `bb/skills/dev-finish/summary.md` for an example.
 
 ## Add a new skill
 
@@ -27,18 +27,18 @@ description: <one sentence on what the skill does and when to invoke it, ending 
 ---
 ```
 
-The `description` is what Claude reads to decide whether to apply the skill — write it specifically and end with the invocation phrase so the trigger is unambiguous.
+The `description` is what Claude reads to decide whether to apply the skill. Write it specifically and end with the invocation phrase so the trigger is unambiguous.
 
 ### Naming
 
 Skill names follow `<discipline>-<verb>`:
 
 - `dev-*` — software development workflow
-- `ops-*` — operations and infrastructure
-- `sec-*` — security
+- `content-*` — content writing and review
+- `security-*` — security related tasks and processes
 - (add more disciplines as the team grows)
 
-Names should describe an action the user is taking. `dev-plan`, `ops-deploy`, `sec-audit` — not `dev-planner`, `ops-deployment-tool`, `sec-auditor`.
+Names should describe an action the user is taking. `dev-plan`, `content-review`, `security-audit` — not `dev-planner`, `content-reviewing-tool`, `security-auditor`.
 
 ## Testing a skill locally before opening the PR
 
@@ -68,8 +68,7 @@ Reviewer should check:
 - Frontmatter is present and the `description` ends with the `Use when the user invokes /bb:<skill-name>.` phrase.
 - Name follows the `<discipline>-<verb>` convention.
 - Content reads as **instructions to Claude**, not documentation *about* Claude.
-- The skill scaffolds a conversation or process — it doesn't mandate a workflow or lock in a tool choice.
-- If a sub-spec belongs in a sibling file (because it'll evolve on its own cadence), it lives there, not inline.
+- The skill contains steps that will be relevant to everyone every time a task is carried out, and that we want to be consistent for the whole team
 
 ## Updating an existing skill
 
