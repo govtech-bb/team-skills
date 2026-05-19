@@ -13,7 +13,7 @@ Run these in Claude Code once:
 /plugin install bb@team-skills
 ```
 
-Restart Claude Code. The skills are now available as `/bb:<name>`.
+Restart Claude Code, or run `/reload-plugins`. The skills are now available as `/bb:<name>`.
 
 Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new version at the next startup.
 
@@ -25,7 +25,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-start` | You're sitting down to a known change and want to ground the session before coding |
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
 
-Three skills today. The set will grow — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to add yours.
+Three skills today. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
 ## How this is laid out
 
@@ -43,7 +43,7 @@ README.md
 CONTRIBUTING.md
 ```
 
-One plugin (`bb`) holds all the skills. Skills are invoked as `/bb:<skill-name>` — the `bb:` prefix is Claude Code's plugin namespace, and the `dev-` / `ops-` / `sec-` part inside the skill name marks the discipline.
+One plugin (`bb`) holds all the skills. Skills are invoked as `/bb:<skill-name>` — the `bb:` prefix is Claude Code's plugin namespace, and the `dev-` / `content-` / `security-` part inside the skill name marks the discipline.
 
 ## Contribute
 
