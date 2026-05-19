@@ -1,15 +1,18 @@
-# team-skills
-
-Shared Claude Code skills for GovTech Barbados.
+# Shared Claude Code skills for GovTech Barbados
 
 These skills give the team a common scaffold for everyday work — planning a change, starting a coding session, finishing one — without prescribing any single workflow. Each discipline (dev, ops, sec, …) contributes skills under one shared namespace.
 
 ## Install
 
-Run these in Claude Code once:
+First, add the team-skills repo as a marketplace:
 
 ```
 /plugin marketplace add govtech-bb/team-skills
+```
+
+Then install the bb skills plugin:
+
+```
 /plugin install bb@team-skills
 ```
 
