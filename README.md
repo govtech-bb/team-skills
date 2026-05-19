@@ -1,0 +1,50 @@
+# team-skills
+
+Shared Claude Code skills for GovTech Barbados.
+
+These skills give the team a common scaffold for everyday work — planning a change, starting a coding session, finishing one — without prescribing any single workflow. Each discipline (dev, ops, sec, …) contributes skills under one shared namespace.
+
+## Install
+
+Run these in Claude Code once:
+
+```
+/plugin marketplace add govtech-bb/team-skills
+/plugin install bb@team-skills
+```
+
+Restart Claude Code. The skills are now available as `/bb:<name>`.
+
+Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new version at the next startup.
+
+## What's here
+
+| Skill | Use it when |
+|---|---|
+| `/bb:dev-plan` | You're about to change code and want to think the approach through before writing any |
+| `/bb:dev-start` | You're sitting down to a known change and want to ground the session before coding |
+| `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
+
+Three skills today. The set will grow — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to add yours.
+
+## How this is laid out
+
+```
+.claude-plugin/marketplace.json   ← makes this repo a Claude Code marketplace
+bb/
+  .claude-plugin/plugin.json      ← the single plugin shipped from this marketplace
+  skills/
+    dev-plan/SKILL.md
+    dev-start/SKILL.md
+    dev-finish/
+      SKILL.md
+      summary.md                  ← referenced helper file; independently iterable
+README.md
+CONTRIBUTING.md
+```
+
+One plugin (`bb`) holds all the skills. Skills are invoked as `/bb:<skill-name>` — the `bb:` prefix is Claude Code's plugin namespace, and the `dev-` / `ops-` / `sec-` part inside the skill name marks the discipline.
+
+## Contribute
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).

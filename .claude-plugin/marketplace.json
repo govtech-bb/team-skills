@@ -1,0 +1,13 @@
+{
+  "name": "team-skills",
+  "owner": {
+    "name": "GovTech Barbados"
+  },
+  "plugins": [
+    {
+      "name": "bb",
+      "source": "./bb",
+      "description": "Shared skills for GovTech Barbados, namespaced by discipline (dev-*, ops-*, sec-*)."
+    }
+  ]
+}

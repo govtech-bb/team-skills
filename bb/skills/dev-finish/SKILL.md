@@ -1,0 +1,94 @@
+---
+name: dev-finish
+description: End a coding session cleanly. Confirm the change works, capture decisions worth recording, write a short summary, run tests, then commit. Use when the user invokes /bb:dev-finish.
+---
+
+# dev-finish
+
+Finalize the current coding session. Run the steps in order — don't skip ahead.
+
+If the line below has content after the colon, treat it as user guidance to bear in mind throughout. Otherwise ignore.
+
+Bear in mind: $ARGUMENTS
+
+## 1. Confirm the change works
+
+If this session produced a meaningful change (a new feature, a bug fix, a refactor with risk, a dependency update):
+
+- If you already tested it end to end this session and it worked, note that and move on.
+- If not, test it now. Use the project's local dev environment — consult `CLAUDE.md` or the project's readme for how to bring it up. Run the user-visible flow that exercises the change.
+- If the test reveals a problem, **stop the wrap.** Summarize what failed and hand back to the user. Don't continue to summary or commit on broken code.
+
+For trivial work (single-line fixes, doc edits, no behaviour change), say so in one line and skip.
+
+## 2. Review for missed work
+
+Look over the conversation and the current diff. Check for:
+
+- **Discussed but not done** — things you talked about doing but didn't.
+- **Tests** — new behaviour without tests, or tests you said you'd write.
+- **TODOs** — `TODO` / `FIXME` left in the diff that shouldn't ship.
+- **Cleanup** — debug prints, commented-out code, scratch files that shouldn't be committed.
+
+If you find anything, present a short table summarizing each finding, walk through them one at a time, wait for the user's decision on each, then implement decisions in a single pass.
+
+If nothing's missed, say so in one line and move on.
+
+## 3. Capture decisions worth recording
+
+Review the session for **architectural decisions** worth writing down — choices that establish a principle, precedent, or convention that future work on this codebase should respect.
+
+The bar is high. A decision record is a constraint on future work, not a project diary. Write one when:
+
+- The decision sets a principle that future implementations must respect (e.g. "all currency values use minor units", "auth tokens never persist to disk").
+- It establishes a convention (vocabulary, schema, naming, policy) the codebase will lean on consistently.
+- It supersedes a previous decision.
+
+Do **not** write one for: bug fixes, performance tweaks that solve one concrete problem, things obvious from reading the code, "here's how this currently works" descriptions.
+
+If you can't articulate which future decision the record would constrain, don't write it.
+
+If a candidate exists:
+
+1. Propose it to the user in this shape — wait for approval before writing:
+
+   > **Title:** `<kebab-case title naming the principle>`
+   > **Principle:** `<the rule, stated in the abstract>`
+   > **Today's instance:** `<the specific decision that surfaced it>`
+
+2. If the project has an existing decision-record location (ADR directory, design-docs folder), use it. Otherwise ask, defaulting to `docs/decisions/<NNNN>-<slug>.md` with sequential numbering — create the directory if missing.
+
+3. Write the record. Keep it short — context, decision, consequences.
+
+## 4. Write a session summary
+
+Write a short narrative of the session to `docs/summaries/<YYYY-MM-DD>-<slug>.md` (use the project's convention if it has one; create the directory if missing).
+
+The summary captures **why** the code now looks the way it does — the reasoning that doesn't survive in the diff. See [summary.md](summary.md) for the spec.
+
+**Skip when** the session was purely mechanical — single-line fix, formatting, dependency bump with no debate, pre-decided rename. When in doubt, ask the user.
+
+## 5. Tests and lint
+
+Run the project's test suite and any lint or type-check it uses.
+
+- Find the command in `CLAUDE.md` or the project's README. Don't guess.
+- If anything fails, **stop and discuss with the user.** Don't commit failing code. Don't bypass hooks (`--no-verify`, etc.) without the user explicitly asking for it.
+- If tests already ran and passed during this session, note that and skip re-running.
+
+## 6. Commit
+
+- Stage files by path (`git add <path>`), not `git add -A` or `git add .` — keeps secrets and scratch files out of commits by accident.
+- Group related changes into one commit per concern. Unrelated changes go in separate commits.
+- Use the project's commit-message convention if it has one (consult `CLAUDE.md` or recent `git log`). If there's no convention, write clear present-tense messages.
+- Decision records and other docs are typically separate commits from code.
+- Don't commit files that look like secrets (`.env`, credentials, keys). Flag them instead.
+
+After committing, hand back to the user. Pushing is the user's call.
+
+## Edge cases
+
+- **Clean tree, nothing to wrap.** Say so in one line and exit.
+- **Substantive session with no commits yet** (pure investigation, prompt iteration, debugging that informed a decision): still write the summary — that reasoning is exactly what would otherwise vanish.
+- **User tells you to skip a step.** Honor it, but flag the risk if relevant (e.g. skipping tests on a non-trivial change).
+- **Pre-commit hook fails.** The commit didn't happen. Fix the issue and create a new commit. Don't `--amend` or `--no-verify`.
