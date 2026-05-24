@@ -34,6 +34,8 @@ If you find anything, present a short table summarizing each finding, walk throu
 
 If nothing's missed, say so in one line and move on.
 
+Leverage review and explore subagents where applicable, to check over the content provided, and have them report back to you with their findings.
+
 ## 3. Capture decisions worth recording
 
 Review the session for **architectural decisions** worth writing down — choices that establish a principle, precedent, or convention that future work on this codebase should respect.
@@ -72,7 +74,7 @@ The summary captures **why** the code now looks the way it does — the reasonin
 
 Run the project's test suite and any lint or type-check it uses.
 
-- Find the command in `CLAUDE.md` or the project's README. Don't guess.
+- Find the command in `CLAUDE.md` or the project's README. Don't guess. If not provided, then ask a question.
 - If anything fails, **stop and discuss with the user.** Don't commit failing code. Don't bypass hooks (`--no-verify`, etc.) without the user explicitly asking for it.
 - If tests already ran and passed during this session, note that and skip re-running.
 
@@ -83,6 +85,7 @@ Run the project's test suite and any lint or type-check it uses.
 - Use the project's commit-message convention if it has one (consult `CLAUDE.md` or recent `git log`). If there's no convention, write clear present-tense messages.
 - Decision records and other docs are typically separate commits from code.
 - Don't commit files that look like secrets (`.env`, credentials, keys). Flag them instead.
+- If worktrees were used, inform the user which branch the implemented feature should be merged into. If no branch currently exists that matches the work done, and the user has not provided a branch name to use, then confirm with the user what branch to "branch off of", create it, and then merge the changes into that branch.
 
 After committing, hand back to the user. Pushing is the user's call.
 
