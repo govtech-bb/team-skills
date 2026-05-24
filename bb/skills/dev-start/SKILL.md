@@ -25,6 +25,8 @@ Check the current state of the code the change will touch. Names, shape, tests, 
 
 If the project has a `CLAUDE.md`, read it for conventions (test commands, lint, anything project-specific you'd otherwise have to guess).
 
+When developing, unless explicitly stated otherwise, let the user know that you will be leveraging worktrees. As such, inform and confirm with the user, what branch the feature you are working on should be merged into, once you have completed development.
+
 ## 3. Ask questions
 
 If anything is ambiguous, under-specified, or seems wrong, ask before building. Batch questions into one message where possible.
@@ -44,9 +46,13 @@ Keep it tight. A few bullets, not a paragraph.
 ## 5. Wait for confirmation
 
 Do not start building until the user confirms. If they correct your understanding, revise and confirm again.
+**IMPORTANT**
+DO NOT START BUILDING UNTIL THE USER CONFIRMS. Always ask for user confirmation after you repeat intent.
 
 ## 6. Build
 
-Once confirmed, implement. Follow the project's normal workflow — write tests as you go, commits at meaningful checkpoints, align to the project's `CLAUDE.md` conventions.
+Once confirmed, implement. Follow the project's normal workflow — write tests as you go, commit at meaningful checkpoints and align to the project's `CLAUDE.md` conventions.
+
+Similarly, to preserve context window, and adhere to best practices, ALWAYS leverage subagents and Test Driven Development.
 
 When the implementation work is done, hand back to the user. This skill ends at "I'm done coding." Wrapping up — tests, decisions worth recording, the commit — is `/bb:dev-finish`, a separate invocation.
