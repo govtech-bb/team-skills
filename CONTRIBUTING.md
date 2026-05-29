@@ -60,6 +60,7 @@ Reload Claude Code, invoke your skill, iterate. Remove the local marketplace bef
 - Branch off `main`.
 - One coherent change per PR — a new skill, or a focused edit to an existing one.
 - In the PR description, say what the skill does and when a user would invoke it. If you tested it locally, mention the scenarios you tried.
+- Ensure that you update the version number in the `plugin.json` present in the `.claude-plugin` directory.
 
 ## Reviewing a PR
 
