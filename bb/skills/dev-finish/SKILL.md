@@ -86,9 +86,11 @@ Run the project's test suite and any lint or type-check it uses.
 - Decision records and other docs are typically separate commits from code.
 - Don't commit files that look like secrets (`.env`, credentials, keys). Flag them instead.
 - If worktrees were used, inform the user which branch the implemented feature should be merged into. If no branch currently exists that matches the work done, and the user has not provided a branch name to use, then confirm with the user what branch to "branch off of", create it, and then merge the changes into that branch.
-- If a github issue was referenced, inform the user of which issue was being targeted, provide a link to it, and remove the "progressing" label from it.
+- If a github issue was referenced, inform the user of which issue was being targeted, provide a link to it, and remove the "progressing" label from it. 
 
 After committing, hand back to the user. Pushing is the user's call.
+
+If the user asks you to push, and open a PR, ensure that if a GitHub issue was referenced, the GitHub issue number is a part of the PR body.
 
 ## Edge cases
 
