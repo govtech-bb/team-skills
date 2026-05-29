@@ -20,6 +20,8 @@ Before the first substantive reply, do a light context pass. Adapt to what the p
 - Look at the code area the topic touches — names, shape, how it's wired up.
 
 Pull specific docs in as their relevance becomes clear during discussion. Don't read everything upfront.
+Check the related remote repository for issues relating to the task, if no GitHub issue is explicitly mentioned.
+If no such issue could be found, ask the user if they would like to create an issue on github with an overview of your findings and the task at hand.
 
 ## 2. Discuss
 
@@ -64,6 +66,7 @@ Ask the user where the plan should live. If they don't have a preference, defaul
 
 If the feature is long, break it up into multiple named sessions.
 
+If an issue was confirmed, or provided, then add the "ready" label to it.
 After writing, stop. Implementation is a separate session — typically `/bb:dev-start`.
 
 ## Edge cases
