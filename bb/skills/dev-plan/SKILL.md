@@ -21,6 +21,7 @@ Before the first substantive reply, do a light context pass. Adapt to what the p
 
 Pull specific docs in as their relevance becomes clear during discussion. Don't read everything upfront.
 Check the related remote repository for issues relating to the task, if no GitHub issue is explicitly mentioned.
+If no such issue could be found, ask the user if they would like to create an issue on github with an overview of your findings and the task at hand.
 
 ## 2. Discuss
 
