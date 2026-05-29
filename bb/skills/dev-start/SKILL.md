@@ -19,6 +19,9 @@ If they gave a free-text description, treat the conversation itself as the spec.
 
 If there's no pointer at all, ask the user to describe what they're working on before continuing.
 
+Check the remote repository for any related issues, if an issue was not explicitly referenced in the plan, or in the prompt. 
+If such issue exists, then add the "progressing" label to it.
+
 ## 2. Orient
 
 Check the current state of the code the change will touch. Names, shape, tests, callers. If a plan was written days or weeks ago, code drift is common — note any gap between what the plan assumes and what's there now.
