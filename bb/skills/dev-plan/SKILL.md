@@ -62,7 +62,9 @@ Once the user gives the nod, write the plan. A reasonable default shape:
 
 Drop sections that don't apply for a small, focused change.
 
-Ask the user where the plan should live. If they don't have a preference, default to a markdown file under `docs/plans/<slug>.md` in the project, creating the directory if needed.
+Ask the user where the plan should live. If they don't have a preference, default to a markdown file under `docs/plans/<slug>.md` in the project, creating the directory if needed. 
+
+If the plan is related to a GitHub issue, then the plan name should be `docs/plans/issue-number-<slug>.md` by default.
 
 If the feature is long, break it up into multiple named sessions.
 
