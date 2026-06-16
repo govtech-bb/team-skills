@@ -21,7 +21,7 @@ Before the first substantive reply, do a light context pass. Adapt to what the p
 
 Pull specific docs in as their relevance becomes clear during discussion. Don't read everything upfront.
 Check the related remote repository for issues relating to the task, if no GitHub issue is explicitly mentioned.
-If no such issue could be found, ask the user if they would like to create an issue on github with an overview of your findings and the task at hand.
+If no such issue could be found, ask the user if they would like to create an issue on github with an overview of your findings and the task at hand, and assign it to the user.
 
 ## 2. Discuss
 
@@ -68,6 +68,15 @@ If the feature is long, break it up into multiple named sessions.
 
 If an issue was confirmed, or provided, then add the "ready" label to it.
 After writing, stop. Implementation is a separate session — typically `/bb:dev-start`.
+
+Note: Session plans are **not version-controlled**, but the directory is intentionally **not** gitignored — so plans stay reachable via the `@`-mention file picker (which respects `.gitignore`). 
+
+Note: This is a rule that may be enforced by a local PreToolUse hook (`.claude/hooks/block-commit-plans.sh`): that denies `git commit` when a
+`docs/plans/` file is staged (or when an `add -A`/`add . && commit` one-liner
+would sweep one in), and denies an explicit `git add docs/plans/...`. A bare
+`git add -A` is still allowed — only the commit is blocked. If you need to
+commit other work, stage those files **by path** rather than relying on `git
+add -A` while a plan is dirty.
 
 ## Edge cases
 
