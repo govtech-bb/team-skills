@@ -92,6 +92,45 @@ After committing, hand back to the user. Pushing is the user's call.
 
 If the user asks you to push, and open a PR, ensure that if a GitHub issue was referenced, the GitHub issue number is a part of the PR body.
 
+## Extra
+
+### Cleaning up after work
+
+When the human says **"clean up"** (or "wrap up and clean up") after work is
+committed, run these steps in order:
+
+1. **Push** the current branch to the remote.
+2. **Open a PR against `sandbox`** (the default base). If a GitHub issue was
+   referenced, include its number in the PR body.
+3. **Automatically remove the worktree** once the branch is pushed — no need to
+   ask first.
+4. **Delete the plan file** (e.g. the `docs/plans/*.md` the session worked
+   from) — automatically, no need to ask. A plan exists only to drive the work
+   up to the PR; once the PR is open it has served its purpose, and the
+   end-of-session summary captures anything worth keeping. Plans are **not**
+   version-controlled (see "Session plans live in `docs/plans/`" below), so
+   there's nothing to keep around after the PR is made.
+5. **Offer to watch CI yourself.** Ask the human whether you should watch the
+   PR's CI. If they say yes, run `gh pr checks <n> --watch` and **block until it
+   finishes** — do not hand the build back to the human to follow. Then:
+   - **All checks green** → merge the PR.
+   - **Any check fails** → investigate and fix the failures (push fixes to the
+     same branch and re-watch), rather than just reporting them back.
+
+### When work is finished, close the related GitHub issue
+
+After completing a piece of work, check GitHub (`gh issue list` / `gh issue
+view`) for an issue the work resolves.
+
+- **If the issue was explicitly referenced in the plan**, no confirmation is
+  needed — add a comment summarizing the resolution (link the PR/commit) and
+  close it.
+- **Otherwise**, confirm with the human that it's the right issue before
+  closing. Watch for a plan that cites a stale or duplicate issue number — the
+  live issue may differ from the one named.
+
+
+
 ## Edge cases
 
 - **Clean tree, nothing to wrap.** Say so in one line and exit.
