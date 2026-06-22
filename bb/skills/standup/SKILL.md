@@ -92,27 +92,29 @@ weekday:
 | Sunday     | Friday           | 2         |
 
 Compute the cutoff as an ISO timestamp (days-back rule above, time of day from
-config, offset pinned to AST):
+config). Both "today's weekday" and the cutoff are computed **in AST**, not the
+machine's local timezone — Barbados is AST year-round, so pinning the zone keeps
+the result correct on a traveling laptop or a non-AST runner:
 
 PowerShell:
 ```powershell
 $cfg = Get-Content (Join-Path $HOME ".claude/standup-config.json") -Raw | ConvertFrom-Json
 $parts = $cfg.standupEndTime.Split(':'); $h = [int]$parts[0]; $m = [int]$parts[1]
-$now = Get-Date
+$now = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(-4))   # AST, regardless of machine TZ
 switch ($now.DayOfWeek) {
   'Monday'   { $back = 3 }
   'Sunday'   { $back = 2 }
   'Saturday' { $back = 1 }
   default    { $back = 1 }   # Tue–Fri
 }
-($now.Date.AddDays(-$back).AddHours($h).AddMinutes($m)).ToString("yyyy-MM-ddTHH:mm:ss") + "-04:00"
+$now.Date.AddDays(-$back).AddHours($h).AddMinutes($m).ToString("yyyy-MM-ddTHH:mm:ss") + "-04:00"
 ```
 
-bash (GNU `date`; on macOS use `date -v`):
+bash (GNU `date`; on macOS use coreutils `gdate` or adapt with `date -v`):
 ```bash
 t=$(sed -n 's/.*"standupEndTime"[^"]*"\([^"]*\)".*/\1/p' ~/.claude/standup-config.json)
-case $(date +%u) in 1) back=3 ;; 7) back=2 ;; 6) back=1 ;; *) back=1 ;; esac
-date -d "today -${back} days ${t}" +%Y-%m-%dT%H:%M:%S-04:00
+case $(TZ=America/Barbados date +%u) in 1) back=3 ;; 7) back=2 ;; 6) back=1 ;; *) back=1 ;; esac
+TZ=America/Barbados date -d "today -${back} days ${t}" +%Y-%m-%dT%H:%M:%S-04:00
 ```
 
 Use the printed value as `<cutoff>` below.
@@ -123,8 +125,11 @@ This is a team skill, so attribute work to **whoever is running it** — never a
 hardcoded name. Resolve the current author from git:
 
 ```bash
-me=$(git config user.name)
+me=$(git config user.name); [ -z "$me" ] && me=$(git config user.email)
 ```
+
+(`git log --author` matches against the email too, so the fallback works when
+`user.name` is unset.)
 
 Commits authored by that user across all branches since the cutoff:
 
@@ -137,7 +142,7 @@ Also pull PRs the user opened or merged in the window (the `gh`-authed account
 is the same person):
 
 ```bash
-gh pr list --author "@me" --state all --limit 30 \
+gh pr list --author "@me" --state all --limit 100 \
   --json number,title,state,mergedAt,updatedAt,url
 ```
 
