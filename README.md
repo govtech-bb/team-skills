@@ -27,8 +27,9 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-plan` | You're about to change code and want to think the approach through before writing any |
 | `/bb:dev-start` | You're sitting down to a known change and want to ground the session before coding |
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
+| `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
 
-Three skills today. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
 ## How this is laid out
 
@@ -42,6 +43,7 @@ bb/
     dev-finish/
       SKILL.md
       summary.md                  ← referenced helper file; independently iterable
+    standup/SKILL.md
 README.md
 CONTRIBUTING.md
 ```
