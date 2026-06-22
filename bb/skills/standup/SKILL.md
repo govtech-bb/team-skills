@@ -1,6 +1,6 @@
 ---
 name: standup
-description: Produce a bulleted standup summary of the user's work since the end of the previous workday's standup, built from git history and merged PRs in the current repo. On first run it asks what time standup ends; run with "change time" to update that. Use when the user invokes /bb:standup.
+description: Produce a bulleted standup summary of the user's work since the end of the previous workday's standup, built from git history and merged PRs in the current repo. On first run it asks what time standup ends; run with "change time" to update it. Use when the user invokes /bb:standup.
 ---
 
 # Standup Summary
@@ -36,35 +36,28 @@ the skill owns:
 { "standupEndTime": "10:30" }
 ```
 
-`standupEndTime` is a 24-hour `HH:MM` time of day in **AST (UTC−4, no DST)** —
-the moment the standup ends, which is where each day's reporting window begins.
-The skill ships read-only inside the plugin cache, so this user-writable file is
-where the setting lives. It is global (not per-repo).
+`standupEndTime` is a 24-hour `HH:MM` time of day, interpreted in **the machine's
+local timezone** — i.e. the user's own time wherever they're running from. There
+is no separate timezone setting: the local clock already reflects where the user
+is, and the computation below reads the real local UTC offset (DST included), so
+nothing is hardcoded. The skill ships read-only inside the plugin cache, so this
+user-writable file is where the setting lives. It is global (not per-repo).
 
 ### Changing the standup-end time
 
-1. Ask the user: **"What time does your standup end? (24-hour AST, e.g. `10:30`)"**
+1. Ask the user: **"What time does your standup end? (24-hour, e.g. `10:30`)"**
 2. Normalize their answer to `HH:MM` (accept things like "10:30am", "10.30",
    "quarter past ten" and convert). If it isn't a sensible time of day, say so
    and ask again.
-3. Write it to the config file:
+3. Write it to the config file (substitute the user's time for `10:30`):
 
-   PowerShell:
-   ```powershell
-   $dir = Join-Path $HOME ".claude"
-   if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
-   @{ standupEndTime = "10:30" } | ConvertTo-Json |
-     Set-Content (Join-Path $dir "standup-config.json") -Encoding utf8
-   ```
-
-   bash (macOS/Linux):
    ```bash
    mkdir -p ~/.claude
    printf '{\n  "standupEndTime": "10:30"\n}\n' > ~/.claude/standup-config.json
    ```
 
-   (Substitute the user's time for `10:30`.)
-4. Confirm: "Standup-end time set to `HH:MM` AST." Then stop — only continue to a
+   (PowerShell equivalent: `@{ standupEndTime = "10:30" } | ConvertTo-Json | Set-Content (Join-Path $HOME ".claude/standup-config.json") -Encoding utf8`.)
+4. Confirm: "Standup-end time set to `HH:MM`." Then stop — only continue to a
    summary if the user explicitly asks.
 
 ## Produce the summary
@@ -80,9 +73,8 @@ Read `~/.claude/standup-config.json`.
 
 ### Step 1 — Compute the window cutoff
 
-The window starts at the configured `standupEndTime` (**AST, UTC−4, no DST**) on
-the **previous workday** (Mon–Fri). "Previous workday" depends on today's
-weekday:
+The window starts at the configured `standupEndTime` on the **previous workday**
+(Mon–Fri). "Previous workday" depends on today's weekday:
 
 | Today      | Previous workday | Days back |
 |------------|------------------|-----------|
@@ -91,31 +83,18 @@ weekday:
 | Saturday   | Friday           | 1         |
 | Sunday     | Friday           | 2         |
 
-Compute the cutoff as an ISO timestamp (days-back rule above, time of day from
-config). Both "today's weekday" and the cutoff are computed **in AST**, not the
-machine's local timezone — Barbados is AST year-round, so pinning the zone keeps
-the result correct on a traveling laptop or a non-AST runner:
+Compute the cutoff as an ISO timestamp in **local time** — no timezone override,
+so both the weekday and the cutoff use the machine's own zone, and `%z` emits its
+real UTC offset (DST included):
 
-PowerShell:
-```powershell
-$cfg = Get-Content (Join-Path $HOME ".claude/standup-config.json") -Raw | ConvertFrom-Json
-$parts = $cfg.standupEndTime.Split(':'); $h = [int]$parts[0]; $m = [int]$parts[1]
-$now = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(-4))   # AST, regardless of machine TZ
-switch ($now.DayOfWeek) {
-  'Monday'   { $back = 3 }
-  'Sunday'   { $back = 2 }
-  'Saturday' { $back = 1 }
-  default    { $back = 1 }   # Tue–Fri
-}
-$now.Date.AddDays(-$back).AddHours($h).AddMinutes($m).ToString("yyyy-MM-ddTHH:mm:ss") + "-04:00"
-```
-
-bash (GNU `date`; on macOS use coreutils `gdate` or adapt with `date -v`):
 ```bash
 t=$(sed -n 's/.*"standupEndTime"[^"]*"\([^"]*\)".*/\1/p' ~/.claude/standup-config.json)
-case $(TZ=America/Barbados date +%u) in 1) back=3 ;; 7) back=2 ;; 6) back=1 ;; *) back=1 ;; esac
-TZ=America/Barbados date -d "today -${back} days ${t}" +%Y-%m-%dT%H:%M:%S-04:00
+case $(date +%u) in 1) back=3 ;; 7) back=2 ;; 6) back=1 ;; *) back=1 ;; esac
+date -d "today -${back} days ${t}" +%Y-%m-%dT%H:%M:%S%z
 ```
+
+(GNU `date`; on macOS use coreutils `gdate` or adapt with `date -v`. PowerShell
+equivalent: `$h,$m = (Get-Content ... | ConvertFrom-Json).standupEndTime.Split(':'); $now = Get-Date; switch ($now.DayOfWeek) { 'Monday' {$back=3} 'Sunday' {$back=2} 'Saturday' {$back=1} default {$back=1} }; $now.Date.AddDays(-$back).AddHours([int]$h).AddMinutes([int]$m).ToString("yyyy-MM-ddTHH:mm:sszzz")`.)
 
 Use the printed value as `<cutoff>` below.
 
@@ -184,8 +163,8 @@ Before writing bullets, **filter noise and dedupe**:
 
 Output GitHub-flavored markdown the user can paste/read aloud, in two sections:
 
-**`**Done — since <Day> <HH:MM> AST (<YYYY-MM-DD>)**`** (header with the real
-cutoff — the configured time and the previous-workday date you computed)
+**`**Done — since <Day> <HH:MM> (<YYYY-MM-DD>)**`** (header with the real cutoff —
+the configured time and the previous-workday date you computed)
 
 Under this header, **group the work into related themed sections** rather than
 one flat list. Each section is a short bold title (the theme) followed by its
@@ -238,7 +217,8 @@ changelog.
 - **Wrong cutoff on Monday.** Monday's previous workday is **Friday** (3 days
   back), not Sunday.
 - **Counting a feature commit and its squash-merge as two items.** They're one.
-- **Using the wrong timezone.** AST is UTC−4 with no DST; pin the offset
-  explicitly even though a Barbados machine's local time already matches it.
+- **Overriding the timezone.** Don't force `TZ=` or hardcode an offset — compute
+  in local time and let `%z` report the machine's real offset, so it stays
+  correct as the user travels or across DST.
 - **Hardcoding the author.** Always resolve the current user via
   `git config user.name` / `@me` — this skill is shared across the team.
