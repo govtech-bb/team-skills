@@ -216,7 +216,7 @@ Do not write a public explanation for an internal decision to omit contact.
 When public contact reasons cannot be drafted until internal routing is confirmed, use the locked review note:
 
 ```text
-[Developer note:
+[Dev note:
  PLACEHOLDER ONLY. Populate this “Contact this office for” list using the MDA-facing routing rules.
  ]
 ```
@@ -224,7 +224,7 @@ When public contact reasons cannot be drafted until internal routing is confirme
 For exclusions:
 
 ```text
-[Developer note:
+[Dev note:
  PLACEHOLDER ONLY. Populate this “Do not contact this office for” list using the MDA-facing routing rules.
  ]
 ```
@@ -233,7 +233,7 @@ Use these verbatim when the placeholder is needed.
 
 Do not show an empty public list.
 
-For Word review output, show these placeholder notes in red and no other content in red.
+Make placeholder notes clearly distinguishable from public content. For Markdown output, use the approved note labels. For formatted review documents, use a consistent visual treatment that reviewers can identify easily.
 
 Remove placeholder notes before publication.
 

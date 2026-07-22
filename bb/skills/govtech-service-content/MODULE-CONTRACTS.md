@@ -2,6 +2,8 @@
 
 These contracts define what each reference file owns. They prevent duplication and contradictory instructions.
 
+Maintainer document: This file defines where rules are owned and helps prevent duplication or contradictions. It is not loaded by the skill at runtime.
+
 ## Shared rule
 
 A rule should live in one authoritative module.
@@ -16,7 +18,7 @@ Owns:
 - confirmed fact, source claim, conflict, gap and assumption definitions
 - blocking versus non-blocking thresholds
 - privacy and internal-information gate
-- MDA note, content risk and design note use
+- MDA note, content risk, design note and dev note use
 - escalation owners
 - status prerequisites
 
