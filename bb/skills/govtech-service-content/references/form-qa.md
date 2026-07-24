@@ -64,6 +64,8 @@ Do not classify personal preference as a defect.
 
 ## Journey check
 
+For material branching, first distinguish the applicable observed, required or proposed flows and identify the materially different routes using [journey-logic-and-mapping.md](journey-logic-and-mapping.md). Do not manufacture a flow type that is not supported by the task or evidence.
+
 Confirm:
 
 - the form starts at the correct point
@@ -152,16 +154,24 @@ Ask sensitive or effortful questions only after users understand why they are ne
 For every branch, verify:
 
 - the trigger answer exists
+- the rule or user need behind the branch is supported or visibly unconfirmed
 - the condition is unambiguous
+- the question appears early enough to prevent irrelevant effort
+- the answer changes something material
 - all relevant users see the follow-up
 - irrelevant users do not see it
 - changing the trigger clears or safely preserves dependent answers
 - every outcome has a next step
 - the branch does not invent policy
+- routes with genuinely different requirements or outcomes have not been falsely combined
+- users are not separated where the distinction changes nothing
+- check-your-answers and confirmation reflect the route taken
 
-Test both Yes and No.
+Test every materially different route, not every theoretical combination.
 
-Test returning to change an earlier answer.
+Test both Yes and No where they exist.
+
+Test returning to change an earlier answer, including dependent answers, validation, review and confirmation.
 
 ## “None of these” check
 

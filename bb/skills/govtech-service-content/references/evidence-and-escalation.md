@@ -8,6 +8,7 @@ It controls what may be treated as fact, when drafting is safe, what must remain
 
 - Source hierarchy and paper forms
 - Information classification and consequential facts
+- Branch evidence and decision ownership
 - Drafting thresholds
 - Questions and visible notes
 - Privacy and internal information
@@ -23,7 +24,7 @@ Use this order when sources conflict:
 3. approved GovTech content and service standards
 4. confirmed MDA facts
 5. approved live service content and forms
-6. current master prompts and reusable patterns
+6. current approved reusable patterns supplied for the task or contained in this skill
 7. previous drafts, examples and service-specific decisions
 8. notes and structural assumptions
 
@@ -98,6 +99,7 @@ Check support for:
 - processing time
 - required documents
 - information the form collects
+- branch conditions, route-specific evidence and outcomes
 - legal requirements
 - office locations
 - contact routes
@@ -106,6 +108,21 @@ Check support for:
 - what happens next
 
 Never invent these.
+
+## Branch evidence and ownership
+
+For each material condition that changes the route, establish:
+
+- the rule, user need or confirmed operational reason behind it
+- whether the source is confirmed, assumed, disputed or missing
+- who has authority to confirm or change it
+- which users, routes, evidence requirements or outcomes it affects
+
+An existing form, prototype or live implementation shows observed behaviour. It does not by itself prove that the branch is required or correct.
+
+A reversible structural assumption may be used to explore a route when it cannot be mistaken for an approved rule. Keep it visible.
+
+If an unresolved condition changes eligibility, payment, legal meaning, sensitive-data collection or the service outcome, do not present the required flow as settled. Use Structure only for the affected route and identify the decision owner.
 
 ## Drafting threshold
 

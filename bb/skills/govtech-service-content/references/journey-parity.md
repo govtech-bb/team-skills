@@ -37,14 +37,9 @@ Example:
 
 `Entry → Start → Form → Check answers → Agree and submit → Confirmation`
 
-For branches, show:
+When branching is material, unclear or being improved, distinguish the applicable observed, required or proposed flows using [journey-logic-and-mapping.md](journey-logic-and-mapping.md). Then use this reference to check parity across the affected components. Do not create a required or proposed flow merely to complete the format.
 
-- decision
-- route
-- outcome
-- return or recovery path
-
-Do not assume the published page order matches the real journey.
+Do not assume the published page order or implemented route matches the required journey.
 
 ## Assign one job to each component
 
@@ -266,6 +261,7 @@ Examples:
 - service name changes: all public and transactional components
 - next-step changes: start, confirmation screen and email
 - channel changes: entry, start, help, form and guidance
+- branch changes: preparation, conditional questions, evidence, validation, check answers, declarations, confirmation and route-specific next steps
 
 Do not approve an isolated change when it creates a known contradiction elsewhere.
 
@@ -316,7 +312,8 @@ Confirm:
 - each component has one job
 - facts match
 - terms match unless the action differs
-- routes work
+- routes work and materially different outcomes have been covered
+- observed, required and proposed flows are not confused
 - guidance appears at the right point
 - the form asks only for needed information
 - the user can review before agreeing

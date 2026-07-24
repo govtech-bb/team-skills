@@ -122,11 +122,23 @@ For a simple task, use one sentence instead of the full block.
 
 ## Journey format
 
-Use a short line when possible:
+Use the smallest representation that makes the route clear.
+
+For a simple sequence:
 
 `Service page → Form → Check answers → Agree and submit → Confirmation`
 
-Use a list when the journey has branches.
+Use a route list for a few simple branches and a decision table when conditions interact.
+
+When status matters, label the flow as:
+
+- Observed flow
+- Required flow
+- Proposed flow
+
+A proposed flow must say whether it is a recommended correction supported by evidence or an illustrative proposal requiring confirmation.
+
+Use Mermaid only when branches, loops, actors or existing-versus-proposed logic are materially easier to understand visually. Pair it with a written interpretation.
 
 Do not add a diagram for a simple sequence.
 
@@ -304,7 +316,13 @@ Use for content sufficiently resolved for implementation.
 
 ## Journey
 
-[Sequence or branches]
+[Observed, required or proposed sequence, route list, decision table or map as needed]
+
+## Journey logic
+
+- [Material condition, trigger, route and outcome]
+- [Change-answer or recovery behaviour]
+- [Evidence status or owner where unresolved]
 
 ## Copy
 

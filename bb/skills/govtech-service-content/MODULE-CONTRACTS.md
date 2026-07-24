@@ -1,8 +1,8 @@
 # Module contracts
 
-These contracts define what each reference file owns. They prevent duplication and contradictory instructions.
+Maintainer document. Do not load this file during normal skill use.
 
-Maintainer document: This file defines where rules are owned and helps prevent duplication or contradictions. It is not loaded by the skill at runtime.
+These contracts define what each reference file owns. They prevent duplication and contradictory instructions.
 
 ## Shared rule
 
@@ -19,6 +19,7 @@ Owns:
 - blocking versus non-blocking thresholds
 - privacy and internal-information gate
 - MDA note, content risk, design note and dev note use
+- evidence status and decision ownership for material branch conditions
 - escalation owners
 - status prerequisites
 
@@ -100,11 +101,11 @@ Does not own:
 
 Owns:
 
-- form journey planning
+- form journey planning for simple or already-established routes
 - section and question design
 - one-data-point rule
 - grouping
-- branching notation
+- conditional-display notation
 - no-new-data rule
 - optionality
 - names and addresses
@@ -115,15 +116,36 @@ Owns:
 
 Does not own:
 
+- end-to-end branch diagnosis or flow-map method
 - detailed QA test list
 - confirmation wording
 - service-page content
+
+## journey-logic-and-mapping.md
+
+Owns:
+
+- observed, required and proposed flow definitions
+- when a route list, decision table, journey logic map or Mermaid diagram is useful
+- actor, condition, branch, route and outcome mapping
+- late, missing, excessive, unnecessary and falsely simplified branching
+- proportionate route coverage
+- identifying routes and artifacts affected by a logic change
+
+Does not own:
+
+- evidence classification or decision authority
+- field-level conditional-display notation
+- cross-component factual parity
+- policy, operational or technical approval
 
 ## form-qa.md
 
 Owns:
 
-- logic and sequence checks
+- field-level logic, sequence and implementation checks
+- applying the established route inventory during QA
+- runnable prototype and real-environment route checks
 - validation and error-content checks
 - mutually exclusive options
 - at-least-one rules
@@ -137,6 +159,7 @@ Owns:
 
 Does not own:
 
+- initial flow diagnosis or branch redesign
 - initial drafting format
 - general voice
 - final confirmation templates
@@ -211,6 +234,7 @@ Owns:
 
 Does not own:
 
+- initial flow diagnosis or branch redesign
 - primary drafting standards already held elsewhere
 
 ## audit-and-prioritisation.md
@@ -235,6 +259,7 @@ Does not own:
 Owns:
 
 - small response format
+- journey, decision-table and map presentation formats
 - full creation format
 - review format
 - MDA-question format

@@ -28,7 +28,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-start` | You're sitting down to a known change and want to ground the session before coding |
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
 | `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
-| `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages — and want content-design guidance plus a QA gate |
+| `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages, and service-flow / journey logic — and want content-design guidance plus a QA gate |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
@@ -48,7 +48,9 @@ bb/
     govtech-service-content/
       SKILL.md
       MODULE-CONTRACTS.md         ← module ownership map
-      references/                 ← 13 pattern & QA reference files
+      references/                 ← 14 pattern, QA & journey-logic reference files
+      examples/                   ← service-flow / journey-logic examples
+      tests/                      ← journey-logic calibration / stress tests
       assets/                     ← handover & MDA-question templates
 README.md
 CONTRIBUTING.md

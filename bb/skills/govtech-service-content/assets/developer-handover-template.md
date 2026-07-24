@@ -6,7 +6,11 @@
 
 ## Journey
 
-[Show the sequence or branches.]
+[Show the observed, required or proposed sequence, branches or map. Label an unconfirmed proposal.]
+
+## Journey logic
+
+[For material branching, use a route list or decision table showing the condition, trigger, content or route, change-answer or recovery behaviour, outcome, and evidence status or owner. Remove this section for a simple linear journey.]
 
 ## Copy
 
@@ -19,6 +23,8 @@
 - [Repeatable behaviour]
 - [Validation that affects content]
 - [Routing]
+- [Dependent answers to clear, preserve or recheck]
+- [Route-specific review and confirmation]
 
 ## Developer notes
 

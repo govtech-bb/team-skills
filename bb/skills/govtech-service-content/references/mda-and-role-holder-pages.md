@@ -233,7 +233,7 @@ Use these verbatim when the placeholder is needed.
 
 Do not show an empty public list.
 
-Make placeholder notes clearly distinguishable from public content. For Markdown output, use the approved note labels. For formatted review documents, use a consistent visual treatment that reviewers can identify easily.
+When producing a formatted review document, visually distinguish these placeholder notes from public copy. If colour is used, apply it only to the placeholder notes and do not rely on colour alone to communicate that they are internal.
 
 Remove placeholder notes before publication.
 

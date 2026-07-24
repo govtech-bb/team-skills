@@ -265,7 +265,7 @@ Include them only when:
 - its purpose is clear
 - using it will not bypass the process
 
-Do not add contact details unless users need them to complete the next step or get help.
+Do not add contact details merely because they appeared in an earlier template, prompt or source.
 
 Do not include public contact details in both the confirmation screen and email unless users genuinely need them in both places.
 

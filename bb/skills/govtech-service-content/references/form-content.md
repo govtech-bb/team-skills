@@ -86,6 +86,8 @@ Before writing questions, identify:
 
 Write a short sequence before drafting.
 
+When answers change later questions, evidence, validation, outcomes or next steps, use [journey-logic-and-mapping.md](journey-logic-and-mapping.md) to establish the routes before writing field-level conditional display.
+
 Example:
 
 `Preferences → Child details → Parent or guardian → Emergency contact → Health and care → Uploads → Check answers → Agree and submit → Confirmation`
@@ -272,9 +274,12 @@ What medicine does the child take? (repeatable section)
 
 Branching should:
 
+- use a confirmed rule or a clearly labelled structural assumption
 - show only relevant questions
 - make an implied condition explicit
+- appear early enough to prevent avoidable work
 - keep users on the correct route
+- have a clear effect on content, evidence, validation, outcome or next step
 
 It must not:
 
@@ -282,6 +287,11 @@ It must not:
 - invent an outcome
 - create unsupported eligibility
 - hide a required safe exit
+- treat current technical behaviour as authority for the service rule
+- combine routes whose requirements or outcomes materially differ
+- separate users when the distinction changes nothing and has no confirmed purpose
+
+Do not assume fewer branches are always better. Use the journey-logic reference when deciding whether to move, combine, separate or remove a branch.
 
 ## Yes and no questions
 
