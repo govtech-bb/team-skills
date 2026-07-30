@@ -1,8 +1,18 @@
-# [Service or project name] — product shape
+# [Service name, as the citizen would see it]
 
 **Source:** [URL of the brief]
+**Prototype:** [URL, if there is one]
 **Shaped:** [date]
 **Work category:** [content change | new form | new service (interactive content) | a variation/update of one of those]
+
+## The brief
+
+Three lines. Anyone opening this should know what the project is before they read anything else. The
+sections further down are the detail behind these.
+
+- **Who it's for:** [the people who will use it]
+- **Problem to solve:** [what is wrong today, and what it costs them]
+- **How it tries to solve it:** [the approach in one sentence]
 
 ## Sources read
 
@@ -17,6 +27,28 @@ Only when a prototype or live service was evaluated. Delete this section otherwi
 - **Implied but not built:** [what the prototype gestures at but doesn't do]
 - **Prototype disagrees with the brief:** [each disagreement, and which source says what]
 - **Genuinely left to build:** [the MVP candidate]
+
+## Converting it into the platform
+
+Only when a standalone prototype has to be rebuilt inside the target codebase. Delete otherwise.
+
+**Baseline:** [target repo, and the commit or date the assessment is against — capability moves fast]
+
+### Already supported — recipe and configuration work
+| Prototype behaviour | Platform primitive it maps to |
+|---|---|
+| [Behaviour] | [The existing component, block, validation or service] |
+
+### Not supported yet — new platform capability
+| Prototype behaviour | What has to be built | Where it lands |
+|---|---|---|
+| [Behaviour] | [The new capability] | [Package or app] |
+
+### Data and assets to move
+- [What is embedded in the prototype that has to live somewhere else, and where]
+
+### Dropped in translation
+- [What the prototype does that the platform version deliberately will not do, and why]
 
 ## Target customers
 
