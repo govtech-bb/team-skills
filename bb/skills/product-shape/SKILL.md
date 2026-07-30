@@ -1,0 +1,149 @@
+---
+name: product-shape
+description: Turn a project brief — a GitHub issue, Claude artifact or other online page — into an MVP-first delivery document: target customers, problems, hypotheses, scope, success metric, work category and phased features. Use when the user invokes /bb:product-shape.
+---
+
+# product-shape
+
+Turn a project brief that lives on the web into a written, MVP-first delivery document.
+
+The document exists to **de-risk**. Its bias is toward getting something testable in front of real users
+fast, not toward completeness of plan. A brief describes what someone hopes to build; your job is to find
+the smallest thing that would prove them right or wrong, and to say what order the rest comes in.
+
+The shape is **discussion first, document second** — the same rhythm as `/bb:dev-plan`. Don't draft until
+you've read everything, named the gaps, and asked about the ones that change scope.
+
+If the line below has content after the colon, treat it as the source. Otherwise ask for one.
+
+Source: $ARGUMENTS
+
+## 1. Read the source
+
+- **No source given** → ask for one. Don't proceed without.
+- **GitHub issue or PR** → read the body *and the comments*:
+
+  ```bash
+  gh issue view <number> --repo <owner>/<repo> --json title,body,comments,labels
+  ```
+
+  Comments are load-bearing. Reviewer sign-offs, corrections and scope changes land there, and the body
+  is often stale by comparison.
+- **Any other page** — a Claude artifact, a published doc — → WebFetch it.
+
+Then follow linked material **one level deep, and only where it changes an answer**: an attached form
+PDF, a parent epic. Not every cross-reference. Record what you read, and name anything you deliberately
+skipped.
+
+## 2. Evaluate the prototype
+
+If the brief links a prototype, reading it is not optional. The prototype is the strongest available
+evidence of what already works, and it will usually change the MVP more than the brief does — a brief
+describes intent, a prototype describes reality.
+
+WebFetch it. Single-page HTML prototypes hold their steps, branches and validation in client-side markup
+and script, so the rendered text often shows only the first screen — fetch the raw source too and
+enumerate the steps and conditional logic from it. If the flow still can't be read statically, say so and
+offer to walk it in a browser. Don't guess at it.
+
+Record:
+
+- **What already works end to end** — the steps, and the behaviour they implement.
+- **What the prototype implies but doesn't do** — a submit button that goes nowhere, a rule the brief
+  describes but the page doesn't enforce, a hardcoded lookup table.
+- **Where the prototype and the brief disagree.** Report the disagreement. Don't silently prefer either.
+- **What is therefore genuinely left to build.** This, not the brief's ambition, is the MVP candidate.
+
+## 3. Separate what you know from what you don't
+
+Before asking anything, say out loud what the source already answers and what it doesn't. Briefs are
+routinely strong on scope and silent on customers, hypotheses and metrics.
+
+Never ask the user for something the source already says.
+
+## 4. Discuss
+
+One or two questions per turn, on the gaps only. Prioritise the gaps that would change the MVP — an
+unnamed success metric changes it, a missing contact address doesn't.
+
+Then state explicitly that you could now write something useful, and **ask before drafting.**
+
+If the user says "just write it", write it, and put every unresolved item in Assumptions.
+
+## 5. Draft
+
+Fill [assets/product-shape-template.md](assets/product-shape-template.md). These rules are not
+negotiable — they're the reason the skill exists:
+
+- **Every hypothesis carries a falsifying test.** "Users want this" is not a hypothesis. Write what
+  result would make the team abandon it.
+- **The MVP is the smallest thing that tests the riskiest assumption.** Name the riskiest assumption
+  first, then cut to it. Score risk by what it would cost to be wrong, not by how hard it is to build.
+- **Deferral is the default.** Anything not serving that test goes to a later phase. Deferring is not a
+  demotion, and you don't need permission for it.
+- **Every phase states what it proves and what would make us stop.** A phase with no stop condition is a
+  wish list.
+- **Every phase carries a horizon: `Now (this week)`, `Next week`, or `Later`.** Exactly one phase may be
+  `Now (this week)`, and it has to be genuinely completable this week by the team that exists — measured
+  against what the prototype already does, not against a clean slate. If nothing fits in a week, the MVP
+  is drawn too wide. Say so and redraw it.
+- **Work blocked on an external input can't be `Now`**, however small it is — a monitored inbox address,
+  a data-handling sign-off, a confirmed contact list. Name the blocker and the horizon it unblocks.
+- Prefer a metric that already exists or is cheap to instrument over the theoretically ideal one.
+- Distinguish the citizen from the MDA staff who process the work. They are different customers with
+  different problems, and a solution for one is regularly a burden for the other.
+
+### The logic flow diagram
+
+One `flowchart TD` covering what will be built, with MVP paths solid and deferred branches dashed and
+labelled with their phase, so the reader sees the MVP and its seams in one picture.
+
+- Conditional branches are `{diamond}` decision nodes with labelled edges.
+- Dependencies are edges. External systems — an MDA inbox, a workbook, a payment provider — are their own
+  nodes.
+- Deferred work uses `-.->` and a dashed `classDef`, labelled with its phase.
+- One screen. If it doesn't fit on one, the MVP is too big — say that instead of shrinking the diagram.
+- Don't invent branches the source doesn't support. An unknown is either a node labelled as unknown or a
+  row in Assumptions.
+- Keep node labels free of `(`, `)`, `{`, `}`, `"` and `#` — they break mermaid parsing. The diagram has
+  to render both in the file and in a GitHub comment.
+
+## 6. Write it out
+
+Ask where the document should live. Default to `docs/product-shape/<issue-number>-<slug>.md`, or
+`<slug>.md` when there's no issue number. Create the directory if needed.
+
+## 7. Offer to publish
+
+Offer — never assume — to post the document as a comment on the source issue, so the shaping lives with
+the brief where the team and the service owner will find it. Only on an explicit yes:
+
+```bash
+gh issue comment <number> --repo <owner>/<repo> --body-file <path>
+```
+
+This writes to a shared, externally visible thread. If the user doesn't clearly say yes, don't post.
+
+## 8. Hand off
+
+End by naming the next step, once:
+
+- Categorised as a content change or a new form → `/bb:govtech-service-content` to write the content.
+- Phase 1 ready to build → `/bb:dev-plan`.
+
+Then stop. Don't start planning the implementation in this session.
+
+## Edge cases
+
+- **Source is behind auth and can't be fetched.** Say so and ask the user to paste the content. Don't
+  shape a brief you haven't read.
+- **The brief is already an MVP plan.** Say so plainly, then stress-test it: is the riskiest assumption
+  actually being tested first, and is the `Now` phase really a week's work? Shape it rather than
+  rubber-stamp it.
+- **One customer only.** Fine. Don't invent a second to fill the table.
+- **The prototype is more complete than the brief admits.** Common, and the most valuable thing you can
+  report. Say what's already done and shrink the MVP to match.
+- **Everything is blocked on external inputs.** Then the `Now` phase is chasing those inputs. Say that,
+  and name who is chasing what.
+- **The user wants phases they can't staff.** Name the mismatch. Don't quietly stretch a horizon to make
+  a plan look achievable.
