@@ -28,7 +28,9 @@ Source: $ARGUMENTS
   ```
 
   Comments are load-bearing. Reviewer sign-offs, corrections and scope changes land there, and the body
-  is often stale by comparison.
+  is often stale by comparison. Read all of them, not the most recent few — a decision that reversed
+  something in the body is as likely to be twenty comments back as at the end. Where a comment and the
+  body conflict, the comment is usually newer; say which you followed.
 - **Any other page** — a Claude artifact, a published doc — → WebFetch it.
 
 Then follow linked material **one level deep, and only where it changes an answer**: an attached form
@@ -46,13 +48,26 @@ and script, so the rendered text often shows only the first screen — fetch the
 enumerate the steps and conditional logic from it. If the flow still can't be read statically, say so and
 offer to walk it in a browser. Don't guess at it.
 
-Record:
+Record, in the template's **What already exists** section:
 
 - **What already works end to end** — the steps, and the behaviour they implement.
 - **What the prototype implies but doesn't do** — a submit button that goes nowhere, a rule the brief
   describes but the page doesn't enforce, a hardcoded lookup table.
 - **Where the prototype and the brief disagree.** Report the disagreement. Don't silently prefer either.
 - **What is therefore genuinely left to build.** This, not the brief's ambition, is the MVP candidate.
+
+Three things repay the effort of looking, because a prototype that demos well hides them:
+
+- **Follow the terminal action to its end.** Find what the submit button actually does, then read the
+  failure path, not the happy path. A prototype whose endpoint doesn't exist yet will often catch the
+  error and fabricate success — a generated reference number, a confirmation screen — so reviewers and
+  service owners come away believing a submission works that never left the browser. Say plainly when
+  that's what you find.
+- **Check that the payload carries what the brief promises.** Attachments are the usual casualty: files
+  that appear to upload are regularly dropped or emptied on the way out.
+- **Cross-check the lookup tables against each other.** Where a prototype holds two tables that have to
+  agree — routing areas against office contacts, options against handlers — diff them. A key present in
+  one and missing from the other is a live gap for whoever falls into it.
 
 ## 3. Separate what you know from what you don't
 
@@ -89,6 +104,11 @@ negotiable — they're the reason the skill exists:
   is drawn too wide. Say so and redraw it.
 - **Work blocked on an external input can't be `Now`**, however small it is — a monitored inbox address,
   a data-handling sign-off, a confirmed contact list. Name the blocker and the horizon it unblocks.
+- **When the obvious first phase is blocked, look for the version of it that isn't.** Usually the build
+  is unblocked and only the destination is gated: the same work delivering to a test inbox, a dummy
+  account or a dry run proves the mechanism this week, and flipping the destination becomes next week's
+  phase once the approval lands. Never route real personal data anywhere a sign-off hasn't cleared, and
+  never let that rule turn a shippable week into an idle one.
 - Prefer a metric that already exists or is cheap to instrument over the theoretically ideal one.
 - Distinguish the citizen from the MDA staff who process the work. They are different customers with
   different problems, and a solution for one is regularly a burden for the other.
