@@ -29,6 +29,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
 | `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
 | `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages — and want content-design guidance plus a QA gate |
+| `/bb:product-shape` | You have a brief — a GitHub issue, an artifact, a page — and need it shaped into an MVP you can test this week, plus the phases after it |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
@@ -50,6 +51,9 @@ bb/
       MODULE-CONTRACTS.md         ← module ownership map
       references/                 ← 13 pattern & QA reference files
       assets/                     ← handover & MDA-question templates
+    product-shape/
+      SKILL.md
+      assets/product-shape-template.md   ← the output contract
 README.md
 CONTRIBUTING.md
 ```
