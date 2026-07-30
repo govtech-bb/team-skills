@@ -99,8 +99,13 @@ Then sort every behaviour in the prototype into one of four buckets:
   the actual primitive, not a category. "Conditional requirement" is not an answer; the name of the
   validation that does it is.
 - **Not supported yet** — it needs new platform capability. Say what has to be built and which package or
-  app it lands in. These are the items that carry the schedule risk, so they belong in the earliest phase
-  that can absorb them.
+  app it lands in. **Then give every one of these an MVP fallback**: the degraded version expressible with
+  primitives that exist today. A map picker falls back to a parish dropdown; a collapsible grouped selector
+  falls back to plain checkbox groups; a dependent dropdown falls back to free text; a rule the validation
+  DSL can't express falls back to being enforced operationally. This is the most valuable column in the
+  document — it is what lets the first phase ship the *whole* journey on fallbacks and be tested end to end,
+  instead of stalling until the custom work lands. If a behaviour genuinely has no fallback, say so; that is
+  a real finding and it changes the sequencing.
 - **Data and assets to move** — anything embedded in the prototype that has to live somewhere else.
   Prototypes routinely inline datasets that belong on the server; say where each one goes.
 - **Dropped in translation** — what the platform version deliberately won't do, and why. Silence here
@@ -115,6 +120,14 @@ Two failure modes to avoid:
 - **Don't assume a primitive exists because it obviously should.** Check. The gap between "the platform
   surely handles dates" and the specific validation that enforces a statutory notice period is where
   estimates go wrong.
+- **A helper in a package is not a capability.** Finding a date function in a shared library says nothing
+  about whether the form's own configuration language can reach it. Confirm the primitive is expressible in
+  the artefact you will actually be writing — the recipe, the schema, the config — by finding it in use in
+  an existing example. If it appears nowhere, treat it as new capability however tantalisingly close the
+  building blocks look. This is the single easiest way to under-estimate a port.
+- **Enumerate the input types the prototype uses against the ones the platform declares.** Times of day,
+  durations, currency, coordinates and dependent dropdowns are the usual absentees, and each one is quiet
+  until someone tries to build the field.
 
 ## 4. Separate what you know from what you don't
 

@@ -40,9 +40,12 @@ Only when a standalone prototype has to be rebuilt inside the target codebase. D
 | [Behaviour] | [The existing component, block, validation or service] |
 
 ### Not supported yet — new platform capability
-| Prototype behaviour | What has to be built | Where it lands |
+Every row needs an MVP fallback: the degraded version buildable today. That is what lets phase one ship the
+whole journey and be tested end to end. Write "none" only when there genuinely isn't one.
+
+| Custom capability | MVP fallback | Where it lands |
 |---|---|---|
-| [Behaviour] | [The new capability] | [Package or app] |
+| [Behaviour, and what has to be built] | [The degraded version expressible with existing primitives] | [Package or app] |
 
 ### Data and assets to move
 - [What is embedded in the prototype that has to live somewhere else, and where]
