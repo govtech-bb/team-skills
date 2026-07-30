@@ -95,10 +95,10 @@ are looking for what the platform can already say, in its own terms.
 
 Then sort every behaviour in the prototype into one of four buckets:
 
-- **Already supported** — it maps onto an existing primitive, so it's recipe or configuration work. Name
+- **Form features required** — it maps onto an existing primitive, so it's recipe or configuration work. Name
   the actual primitive, not a category. "Conditional requirement" is not an answer; the name of the
   validation that does it is.
-- **Not supported yet** — it needs new platform capability. Say what has to be built and which package or
+- **Custom features required** — it needs new platform capability. Say what has to be built and which package or
   app it lands in. **Then give every one of these an MVP fallback**: the degraded version expressible with
   primitives that exist today. A map picker falls back to a parish dropdown; a collapsible grouped selector
   falls back to plain checkbox groups; a dependent dropdown falls back to free text; a rule the validation
@@ -113,7 +113,7 @@ Then sort every behaviour in the prototype into one of four buckets:
   column is what makes that visible.
 - **Data and assets to move** — anything embedded in the prototype that has to live somewhere else.
   Prototypes routinely inline datasets that belong on the server; say where each one goes.
-- **Dropped in translation** — what the platform version deliberately won't do, and why. Silence here
+- **Not ported** — what the platform version deliberately won't do, and why. Silence here
   reads as an oversight later.
 
 Two failure modes to avoid:

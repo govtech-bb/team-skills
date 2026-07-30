@@ -34,12 +34,12 @@ Only when a standalone prototype has to be rebuilt inside the target codebase. D
 
 **Baseline:** [target repo, and the commit or date the assessment is against — capability moves fast]
 
-### Already supported — recipe and configuration work
+### Form features required
 | Prototype behaviour | Platform primitive it maps to |
 |---|---|
 | [Behaviour] | [The existing component, block, validation or service] |
 
-### Not supported yet — new platform capability
+### Custom features required
 Every row needs an MVP fallback: the degraded version buildable today. That is what lets phase one ship the
 whole journey and be tested end to end. Write "none" only when there genuinely isn't one.
 
@@ -53,7 +53,7 @@ owed from what someone would like, which is what makes the list cuttable.
 ### Data and assets to move
 - [What is embedded in the prototype that has to live somewhere else, and where]
 
-### Dropped in translation
+### Not ported
 - [What the prototype does that the platform version deliberately will not do, and why]
 
 ## Target customers
