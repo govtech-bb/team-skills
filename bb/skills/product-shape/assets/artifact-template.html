@@ -1,0 +1,780 @@
+<style>
+  :root {
+    --ground: #F1F4F8;
+    --surface: #FFFFFF;
+    --sunken: #E7ECF3;
+    --line: #D3DBE6;
+    --line-soft: #E4EAF2;
+    --ink: #0E1620;
+    --ink-2: #384656;
+    --muted: #5A6675;
+    --accent: #0B4F9E;
+    --accent-soft: #E6EEF8;
+    --built: #1B7A4F;
+    --built-soft: #E4F1EA;
+    --gap: #8A5A00;
+    --gap-soft: #FAEFD9;
+    --broken: #9E1B14;
+    --broken-soft: #FAE8E6;
+
+    --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", ui-serif, Georgia, serif;
+    --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+    --shadow: 0 1px 2px rgba(14, 22, 32, 0.05), 0 8px 24px -12px rgba(14, 22, 32, 0.14);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0D131B;
+      --surface: #141C26;
+      --sunken: #1B2534;
+      --line: #2C3846;
+      --line-soft: #232E3C;
+      --ink: #E7EDF4;
+      --ink-2: #BDC9D6;
+      --muted: #93A1B2;
+      --accent: #6FA8E8;
+      --accent-soft: #1A2839;
+      --built: #46A87A;
+      --built-soft: #16281F;
+      --gap: #D9A63C;
+      --gap-soft: #2A2415;
+      --broken: #E4736A;
+      --broken-soft: #2C1A1A;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0D131B;
+    --surface: #141C26;
+    --sunken: #1B2534;
+    --line: #2C3846;
+    --line-soft: #232E3C;
+    --ink: #E7EDF4;
+    --ink-2: #BDC9D6;
+    --muted: #93A1B2;
+    --accent: #6FA8E8;
+    --accent-soft: #1A2839;
+    --built: #46A87A;
+    --built-soft: #16281F;
+    --gap: #D9A63C;
+    --gap-soft: #2A2415;
+    --broken: #E4736A;
+    --broken-soft: #2C1A1A;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  }
+
+  :root[data-theme="light"] {
+    --ground: #F1F4F8;
+    --surface: #FFFFFF;
+    --sunken: #E7ECF3;
+    --line: #D3DBE6;
+    --line-soft: #E4EAF2;
+    --ink: #0E1620;
+    --ink-2: #384656;
+    --muted: #5A6675;
+    --accent: #0B4F9E;
+    --accent-soft: #E6EEF8;
+    --built: #1B7A4F;
+    --built-soft: #E4F1EA;
+    --gap: #8A5A00;
+    --gap-soft: #FAEFD9;
+    --broken: #9E1B14;
+    --broken-soft: #FAE8E6;
+    --shadow: 0 1px 2px rgba(14, 22, 32, 0.05), 0 8px 24px -12px rgba(14, 22, 32, 0.14);
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 24px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+  }
+
+  /* ── type ─────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(30px, 4.4vw, 45px);
+    line-height: 1.07;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h2 {
+    font-family: var(--display);
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.3;
+    margin: 0;
+  }
+  p { margin: 0; max-width: 68ch; }
+  code, .m { font-family: var(--mono); font-size: 0.88em; }
+  code {
+    background: var(--sunken);
+    border-radius: 3px;
+    padding: 0.1em 0.34em;
+    color: var(--ink-2);
+  }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ── masthead ─────────────────────────────────────── */
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .masthead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    align-items: baseline;
+  }
+  .verdict {
+    font-family: var(--display);
+    font-size: clamp(17px, 2vw, 20px);
+    line-height: 1.35;
+    color: var(--ink-2);
+    max-width: 60ch;
+    text-wrap: balance;
+  }
+  .verdict strong { color: var(--ink); font-weight: 600; }
+
+  /* ── brief ────────────────────────────────────────── */
+  .panel.brief { border-top: 3px solid var(--accent); }
+  .brief-list {
+    display: grid;
+    grid-template-columns: minmax(140px, auto) 1fr;
+    gap: 12px 22px;
+    margin: 0;
+  }
+  .brief-list dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-top: 3px;
+  }
+  .brief-list dd { margin: 0; color: var(--ink-2); max-width: 68ch; }
+
+  /* ── kind tags (obligation vs polish) ─────────────── */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .tag.client { color: var(--accent); font-weight: 600; }
+
+  /* ── kpi row ──────────────────────────────────────── */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .kpi {
+    background: var(--surface);
+    padding: 16px 18px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .kpi-num {
+    font-family: var(--display);
+    font-size: 30px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .kpi-num.is-full { color: var(--built); }
+  .kpi-label { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+
+  /* ── panels ───────────────────────────────────────── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px 26px 26px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .panel-head { display: flex; flex-direction: column; gap: 5px; }
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── status chips (status = colour + always a word) ─ */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+  .chip.gap { color: var(--gap); background: var(--gap-soft); border-color: var(--gap); }
+  .chip.now { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+  .chip.plain { color: var(--muted); background: var(--sunken); border-color: var(--line); }
+
+  /* ── tables ───────────────────────────────────────── */
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 460px; }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    padding: 0 14px 8px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: bottom;
+  }
+  td {
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+  tr:last-child td { border-bottom: none; }
+  th:last-child, td:last-child { padding-right: 0; }
+  .t-strong { color: var(--ink); font-weight: 600; }
+
+  /* ── phase lanes ──────────────────────────────────── */
+  .phases { display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 0 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+  .phase:first-child { border-top: none; padding-top: 4px; }
+  .phase-num {
+    font-family: var(--display);
+    font-size: 27px;
+    line-height: 1;
+    color: var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .phase.is-now .phase-num { color: var(--accent); }
+  .phase-body { display: flex; flex-direction: column; gap: 11px; }
+  .phase-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .phase-facts {
+    display: grid;
+    grid-template-columns: minmax(74px, auto) 1fr;
+    gap: 5px 14px;
+    font-size: 13.5px;
+  }
+  .phase-facts dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 2px;
+  }
+  .phase-facts dd { margin: 0; color: var(--ink-2); }
+  .phase-facts dd.blocked { color: var(--gap); }
+  ul.tasks { margin: 0; padding-left: 17px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; color: var(--ink-2); }
+  ul.tasks li::marker { color: var(--muted); }
+
+  /* ── callout ──────────────────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .callout p { max-width: 72ch; color: var(--ink-2); }
+
+  /* ── diagram ──────────────────────────────────────── */
+  /* ── phase board ──────────────────────────────────── */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    gap: 14px;
+    align-items: start;
+  }
+  .lane {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .lane.is-now { background: var(--accent-soft); border-color: var(--accent); }
+  .lane-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 0 2px;
+  }
+  .lane-name {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .lane.is-now .lane-name { color: var(--accent); font-weight: 600; }
+  .lane-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 11px 12px 12px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+  .card-top { display: flex; align-items: baseline; gap: 9px; }
+  .card-num {
+    font-family: var(--display);
+    font-size: 17px;
+    line-height: 1;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  .lane.is-now .card-num { color: var(--accent); }
+  .card-name { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── anchor jump from a card to its phase ─────────── */
+  :root { scroll-behavior: smooth; }
+  .phase { scroll-margin-top: 20px; }
+  .phase:target {
+    background: var(--accent-soft);
+    margin: 0 -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 8px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :root { scroll-behavior: auto; }
+  }
+
+  /* ── flow diagram (pre-rendered, one per theme) ───── */
+  .diagram { overflow-x: auto; }
+  .diagram svg { display: block; margin: 0 auto; height: auto; max-width: 100%; }
+  .flow-dark { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .flow-light { display: none; }
+    .flow-dark { display: block; }
+  }
+  :root[data-theme="dark"] .flow-light { display: none; }
+  :root[data-theme="dark"] .flow-dark { display: block; }
+  :root[data-theme="light"] .flow-light { display: block; }
+  :root[data-theme="light"] .flow-dark { display: none; }
+
+  footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 560px) {
+    .sheet { padding: 28px 16px 56px; gap: 26px; }
+    .panel { padding: 20px 18px 22px; }
+    .phase { grid-template-columns: 32px 1fr; gap: 0 14px; }
+  }
+</style>
+<!-- ============================================================
+     product-shape artifact template
+     Replace every [bracketed] placeholder. Keep the structure and
+     the CSS above unchanged so every project's page reads as one
+     family. Delete any panel that has nothing to say.
+     ============================================================ -->
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="masthead-meta">
+      <span class="eyebrow">Product shape · Issue #[number]</span>
+      <span class="eyebrow">[Department] · [Ministry]</span>
+      <span class="eyebrow">Platform baseline: [repo] @ [date]</span>
+    </div>
+    <h1>[Service name, as the citizen would see it — identical to the markdown document's H1]</h1>
+    <p class="verdict">
+      [Two lines. What this project is, and the single most decision-relevant fact about it.<br>
+      Use one <strong>strong</strong> phrase, not three.]
+    </p>
+  </header>
+
+  <section class="panel brief">
+    <div class="panel-head">
+      <h2>The brief</h2>
+      <p class="eyebrow">What this project is, before anything else</p>
+    </div>
+    <dl class="brief-list">
+      <dt>Who it's for</dt>
+      <dd>[The people who will use it — citizen and staff both, if both apply.]</dd>
+      <dt>Problem to solve</dt>
+      <dd>[What is wrong today, and what it costs them.]</dd>
+      <dt>How it tries to solve it</dt>
+      <dd>[The approach, in one sentence.]</dd>
+    </dl>
+  </section>
+
+  <!-- Four numbers a reader can act on. Not vanity counts.
+       .is-full tints a number green, .is-zero tints it red — use at most one of each. -->
+  <section class="kpis">
+    <div class="kpi">
+      <span class="kpi-num">[n]</span>
+      <span class="kpi-label">[Custom features required]</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num">[n]</span>
+      <span class="kpi-label">[Of them client requests, carrying an obligation]</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num is-full">[n]</span>
+      <span class="kpi-label">[Screens shippable in week one, on fallbacks]</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-num">[n]</span>
+      <span class="kpi-label">[Custom builds needed before the service is testable]</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Form features required</h2>
+      <p class="eyebrow">Prototype behaviour → the primitive it maps to</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Prototype behaviour</th><th>Platform primitive</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="t-strong">[Behaviour]</td>
+            <td>[The named component, block or validation — <span class="m">like-this</span> for identifiers, <code>path/like/this</code> for paths]</td>
+          </tr>
+          <!-- one row per behaviour the platform already expresses -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Custom features required</h2>
+      <p>[None of these blocks the service from existing — the fallback column is what week one ships.
+        Say how many are client requests and therefore need a conversation before being cut.]</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Custom capability</th><th>Kind</th><th>MVP fallback</th><th>Where it lands</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="t-strong">[Capability — what has to be built]</td>
+            <td><span class="tag client">Client request</span></td>
+            <td>[The degraded version buildable today]</td>
+            <td><code>[package]</code> · <code>[app]</code></td>
+          </tr>
+          <tr>
+            <td class="t-strong">[Capability]</td>
+            <td><span class="tag">UX enhancement</span></td>
+            <td>[Fallback]</td>
+            <td><code>[package]</code></td>
+          </tr>
+          <tr>
+            <td class="t-strong">[Capability]</td>
+            <td><span class="tag">Nice-to-have</span></td>
+            <td>[Fallback]</td>
+            <td><code>[package]</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>[Which of these you verified directly against the baseline, and how. Only claim what you checked.]</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Not ported</h2>
+      <p class="eyebrow">The prototype is the specification, not the starting code</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Prototype feature</th><th>Why not</th></tr></thead>
+        <tbody>
+          <tr><td class="t-strong">[Feature]</td><td>[Why it does not carry over]</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>[Anything that DOES carry over as data rather than code — an inlined dataset, a lookup table, a gap
+      between two tables that whatever routes will inherit.]</p>
+  </section>
+
+  <section class="callout">
+    <span class="eyebrow">Riskiest assumption</span>
+    <p><strong>[The assumption, in one sentence.]</strong> [Why every phase rests on it, what being wrong
+      costs, and which phase is designed to find out.]</p>
+    <!-- Add a second <p> only when the brief contradicts the plan. Name the section of the brief that
+         disagrees, say which source you followed, and who should reconcile it. -->
+  </section>
+
+  <!-- The board is a second reading of the phases below, not new information. Keep the two in step:
+       one card per phase, the card's lane must match that phase's horizon chip, each lane-count must
+       equal its number of cards, and every href must resolve to a phase id. Exactly one card sits in
+       the Now lane. Cards carry only the decision-relevant tag — blocked, risk, candidate to cut —
+       never the horizon, because the column already says that. -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Phase board</h2>
+      <p class="eyebrow">Select a phase to jump to its detail below</p>
+    </div>
+    <div class="board">
+
+      <div class="lane is-now">
+        <div class="lane-head">
+          <span class="lane-name">Now · this week</span>
+          <span class="lane-count">1</span>
+        </div>
+        <a class="card" href="#phase-1">
+          <span class="card-top">
+            <span class="card-num">1</span>
+            <span class="card-name">[Phase 1 name — same wording as the phase below]</span>
+          </span>
+          <span class="card-tags"><span class="chip now">Unblocked</span></span>
+        </a>
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-name">Next week</span>
+          <span class="lane-count">[n]</span>
+        </div>
+        <a class="card" href="#phase-2">
+          <span class="card-top">
+            <span class="card-num">2</span>
+            <span class="card-name">[Phase 2 name]</span>
+          </span>
+        </a>
+        <!-- one <a class="card"> per phase on this horizon; add a tag only when there is one -->
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-name">Later</span>
+          <span class="lane-count">[n]</span>
+        </div>
+        <a class="card" href="#phase-3">
+          <span class="card-top">
+            <span class="card-num">3</span>
+            <span class="card-name">[Phase 3 name]</span>
+          </span>
+          <span class="card-tags"><span class="chip gap">Blocked</span></span>
+        </a>
+      </div>
+
+      <!-- Drop a lane entirely if no phase sits on that horizon. Do not leave it empty. -->
+
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Development phases</h2>
+      <p>[Why the order is what it is — normally: week one is the whole journey on fallbacks, then the
+        order follows what each fallback costs to keep.]</p>
+    </div>
+    <div class="phases">
+
+      <!-- Exactly one phase carries .is-now and the "Now · this week" chip.
+           Chips: .now (accent) · .plain (neutral) · .gap (blocked or risk-bearing). -->
+      <div class="phase is-now" id="phase-1">
+        <span class="phase-num">1</span>
+        <div class="phase-body">
+          <div class="phase-top">
+            <h3>[Phase name]</h3>
+            <span class="chip now">Now · this week</span>
+          </div>
+          <ul class="tasks">
+            <li>[Task]</li>
+          </ul>
+          <dl class="phase-facts">
+            <dt>Proves</dt><dd>[What this phase settles.]</dd>
+            <dt>Stop if</dt><dd>[The result that means we do not continue.]</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="phase" id="phase-2">
+        <span class="phase-num">2</span>
+        <div class="phase-body">
+          <div class="phase-top">
+            <h3>[Phase name]</h3>
+            <span class="chip plain">Next week</span>
+            <span class="chip gap">Blocked</span>
+          </div>
+          <ul class="tasks">
+            <li>[Task]</li>
+          </ul>
+          <dl class="phase-facts">
+            <dt>Proves</dt><dd>[...]</dd>
+            <dt>Blocked on</dt><dd class="blocked">[The external input, and who supplies it.]</dd>
+            <dt>Stop if</dt><dd>[...]</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="phase" id="phase-3">
+        <span class="phase-num">3</span>
+        <div class="phase-body">
+          <div class="phase-top">
+            <h3>[Phase name]</h3>
+            <span class="chip plain">Later</span>
+          </div>
+          <ul class="tasks">
+            <li>[Task]</li>
+          </ul>
+          <dl class="phase-facts">
+            <dt>Proves</dt><dd>[...]</dd>
+            <dt>Stop if</dt><dd>[...]</dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Further phases take the same shape. Every one needs id="phase-N" so the board can link to it,
+           and a horizon chip matching the lane its card sits in. -->
+
+    </div>
+  </section>
+
+  <div class="two-col">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>How success gets measured</h2>
+        <p class="eyebrow">[Which row gates the release]</p>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Metric</th><th>Today</th><th>Target</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">[What is counted]</td><td>[Baseline, or "unknown"]</td><td>[The number that means it worked]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>[What the non-gating rows are for — usually measuring what the fallbacks cost.]</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Who has to say yes</h2>
+        <p class="eyebrow">Blockers, and the phase each holds up</p>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Needed</th><th>From</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">[What is needed]</td><td>[Person or role]</td><td><span class="chip plain">Phase [n]</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>The logic being built</h2>
+      <p>Solid paths are week one, on fallbacks. Dashed paths are the custom upgrades and deferred work, each labelled with the phase that picks it up.</p>
+    </div>
+    <!-- Do NOT put a raw mermaid pre-block here; a published artifact will not reliably render one,
+         and it fails by showing the diagram source as plain text. Run assets/render-flow.py and paste
+         its output below instead: two pre-rendered, id-namespaced SVGs, one per theme. SKILL.md step 8. -->
+    [PASTE the output of render-flow.py here]
+  </section>
+
+  <footer>
+    <span>Summarised from the full product shape for <a href="[issue URL]">[owner/repo#number]</a>, which carries the customers, problems, hypotheses and the complete assumption list.</span>
+    <span>Platform baseline: <span class="m">[repo] @ [commit]</span>, tip of <span class="m">main</span> on [date]. [Anything that changed after the baseline and would mislead a later reader.]</span>
+  </footer>
+
+</div>
