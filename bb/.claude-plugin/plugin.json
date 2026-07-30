@@ -1,5 +1,5 @@
 {
   "name": "bb",
   "description": "Shared skills for GovTech Barbados, namespaced by discipline (dev-*, ops-*, sec-*).",
-  "version": "0.1.12"
+  "version": "0.2.0"
 }

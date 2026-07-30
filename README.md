@@ -29,7 +29,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
 | `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
 | `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages — and want content-design guidance plus a QA gate |
-| `/bb:product-shape` | A brief or a signed-off prototype needs shaping into an MVP you can test this week — including what the platform already expresses versus what has to be built to port it |
+| `/bb:product-shape` | A prototype has to become a real service and you need it shaped first — give it the project history and the prototype URL, get a delivery document plus a one-page artifact covering what the platform already expresses, the custom features required and their MVP fallbacks, and the phase order |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
@@ -53,7 +53,10 @@ bb/
       assets/                     ← handover & MDA-question templates
     product-shape/
       SKILL.md
-      assets/product-shape-template.md   ← the output contract
+      assets/
+        product-shape-template.md        ← the markdown output contract
+        artifact-template.html           ← the one-page artifact's design
+        render-flow.py                   ← mermaid → theme-paired inline SVG
 README.md
 CONTRIBUTING.md
 ```

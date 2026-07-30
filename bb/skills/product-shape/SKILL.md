@@ -1,11 +1,13 @@
 ---
 name: product-shape
-description: Turn a project brief or a signed-off prototype — a GitHub issue, Claude artifact or other online page — into an MVP-first delivery document: who it's for, the problem, hypotheses, what the platform can already express versus what needs building, scope, success metric and phased features. Use it when a standalone HTML prototype has to be converted into the platform codebase. Use when the user invokes /bb:product-shape.
+description: Turn a project history URL and a prototype URL into an MVP-first delivery document plus a published one-page artifact: who it's for, the problem, hypotheses, which prototype behaviours the platform already expresses versus the custom features required and their MVP fallbacks, scope, success metric and phased features. Use it when a standalone HTML prototype has to be converted into the platform codebase. Use when the user invokes /bb:product-shape.
 ---
 
 # product-shape
 
-Turn a project brief that lives on the web into a written, MVP-first delivery document.
+Turn a project's history and its prototype into two things: a written, MVP-first delivery document, and a
+published one-page artifact summarising it for whoever has to decide. Both, every time — the document is the
+record, the artifact is how it actually gets read.
 
 The document exists to **de-risk**. Its bias is toward getting something testable in front of real users
 fast, not toward completeness of plan. A brief describes what someone hopes to build; your job is to find
@@ -21,13 +23,30 @@ is where it gets filled.
 The shape is **discussion first, document second** — the same rhythm as `/bb:dev-plan`. Don't draft until
 you've read everything, named the gaps, and asked about the ones that change scope.
 
-If the line below has content after the colon, treat it as the source. Otherwise ask for one.
+## Inputs
 
-Source: $ARGUMENTS
+This skill needs **two** URLs. Take whichever are present on the line below, and ask for the rest before
+doing anything else — don't start on one while the other is unknown, because the prototype routinely
+changes what the history means.
 
-## 1. Read the source
+Inputs: $ARGUMENTS
 
-- **No source given** → ask for one. Don't proceed without.
+1. **Project history** — where the project has been discussed and decided. Usually a GitHub issue, e.g.
+   `https://github.com/govtech-bb/projects/issues/249`. Ask: *"What's the URL for the project history —
+   the issue or page where this has been discussed?"*
+2. **Prototype** — the standalone page to be converted, e.g.
+   `https://govtech-bb.github.io/newforms/Prototypes/temporary-restaurant-licence.html`. Ask: *"And the
+   URL of the prototype being converted?"* A `?dev` or similar query string is fine and often exposes
+   more; keep it when given.
+
+If there is genuinely no prototype, say so plainly and skip step 2 — but check the history for a link
+first, because one is usually there and unmentioned.
+
+Also establish the **conversion target**: the repository the prototype is being rebuilt in, and the commit
+or date to assess against. Ask if it isn't obvious from the working directory.
+
+## 1. Read the project history
+
 - **GitHub issue or PR** → read the body *and the comments*:
 
   ```bash
@@ -200,7 +219,40 @@ labelled with their phase, so the reader sees the MVP and its seams in one pictu
 Ask where the document should live. Default to `docs/product-shape/<issue-number>-<slug>.md`, or
 `<slug>.md` when there's no issue number. Create the directory if needed.
 
-## 8. Offer to publish
+## 8. Build and publish the artifact
+
+The markdown document is the record. The artifact is how it gets read — a one-page visual summary for
+whoever has to make a decision without reading 300 lines. Produce both; they are not alternatives.
+
+1. Copy [assets/artifact-template.html](assets/artifact-template.html) to a working file. It carries the
+   page's whole design — tokens, both themes, type, panels, chips, tables. **Do not restyle it.** Every
+   project's page should read as the same family, and the template is what makes that true.
+2. Replace every `[bracketed]` placeholder with real content from the document. Delete panels that have
+   nothing to say. The `<h1>` must be **identical** to the markdown document's title.
+3. Render the flow diagram:
+
+   ```bash
+   # extract the mermaid source from the document into flow.mmd, then:
+   python3 assets/render-flow.py flow.mmd > fragment.html
+   ```
+
+   Paste that fragment where the template says to.
+
+   **Do not put a `<pre class="mermaid">` block in the artifact.** A published Artifact does not reliably
+   render one, and when it fails it shows the diagram source as plain text with no error — which looks
+   like a broken page to whoever you sent it to. The script sidesteps that by inlining pre-rendered SVG,
+   one variant per theme, with every internal id namespaced. Keep the ```mermaid fence in the **markdown**
+   document, where GitHub renders it natively.
+
+4. Publish with the Artifact tool: the document's title, a one-sentence description, and a stable favicon.
+   Republishing the same file path keeps the same URL — so an updated document means republishing, not
+   minting a second page.
+
+Before publishing, check the things that fail silently: no unclosed tags, no class used but unstyled, no
+duplicate ids, every `url(#…)` resolving, and the diagram's node labels free of the characters that break
+rendering. If you cannot open the published page to look at it, say so rather than implying you did.
+
+## 9. Offer to publish
 
 Offer — never assume — to post the document as a comment on the source issue, so the shaping lives with
 the brief where the team and the service owner will find it. Only on an explicit yes:
@@ -211,7 +263,7 @@ gh issue comment <number> --repo <owner>/<repo> --body-file <path>
 
 This writes to a shared, externally visible thread. If the user doesn't clearly say yes, don't post.
 
-## 9. Hand off
+## 10. Hand off
 
 End by naming the next step, once:
 
@@ -222,8 +274,13 @@ Then stop. Don't start planning the implementation in this session.
 
 ## Edge cases
 
-- **Source is behind auth and can't be fetched.** Say so and ask the user to paste the content. Don't
+- **Either URL is behind auth and can't be fetched.** Say so and ask the user to paste the content. Don't
   shape a brief you haven't read.
+- **No prototype exists.** Check the history for a link first — there usually is one. If there genuinely
+  isn't, skip the prototype and conversion steps, say in the document that the assessment is from the
+  history alone, and expect the scope to move once something is built.
+- **The prototype has moved on since the history was written.** Normal, and worth stating: name the date of
+  the last history entry and say the prototype is the newer source.
 - **The brief is already an MVP plan.** Say so plainly, then stress-test it: is the riskiest assumption
   actually being tested first, and is the `Now` phase really a week's work? Shape it rather than
   rubber-stamp it.
