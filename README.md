@@ -57,6 +57,7 @@ bb/
         product-shape-template.md        ← the markdown output contract
         artifact-template.html           ← the one-page artifact's design
         render-flow.py                   ← mermaid → theme-paired inline SVG
+        check-artifact.sh                ← asserts the artifact holds together
 README.md
 CONTRIBUTING.md
 ```

@@ -222,7 +222,12 @@ Ask where the document should live. Default to `docs/product-shape/<issue-number
 ## 8. Build and publish the artifact
 
 The markdown document is the record. The artifact is how it gets read — a one-page visual summary for
-whoever has to make a decision without reading 300 lines. Produce both; they are not alternatives.
+whoever has to make a decision without reading 300 lines, including a phase board they can click into.
+Produce both; they are not alternatives.
+
+The board belongs in the artifact only. A kanban degrades to a redundant list in plain markdown, and the
+document already orders its phases by horizon. If someone wants the same overview in the document, a
+horizon summary table is the honest equivalent — not an ASCII board.
 
 1. Copy [assets/artifact-template.html](assets/artifact-template.html) to a working file. It carries the
    page's whole design — tokens, both themes, type, panels, chips, tables. **Do not restyle it.** Every
@@ -244,13 +249,36 @@ whoever has to make a decision without reading 300 lines. Produce both; they are
    one variant per theme, with every internal id namespaced. Keep the ```mermaid fence in the **markdown**
    document, where GitHub renders it natively.
 
-4. Publish with the Artifact tool: the document's title, a one-sentence description, and a stable favicon.
+4. Fill in the **phase board** — three lanes for the three horizons, one card per phase, each card an
+   anchor to that phase's `id="phase-N"`. Plain `href="#phase-N"` links: no JavaScript, and they work with
+   the keyboard and the back button. The template already carries `scroll-behavior`, a `scroll-margin-top`
+   so the heading doesn't land jammed against the viewport edge, a `:target` tint so the reader can see
+   where they arrived, and a `prefers-reduced-motion` opt-out.
+
+   The board is a second reading of the same phases, so it can silently drift out of step with them. Four
+   things have to hold, and they are worth checking rather than assuming: every `href` resolves to a real
+   phase id, every phase is reachable from some card, each lane's count equals its number of cards, and
+   **each card's lane matches the horizon chip on the phase it links to**. That last one is what rots when
+   a phase moves horizon later.
+
+5. Publish with the Artifact tool: the document's title, a one-sentence description, and a stable favicon.
    Republishing the same file path keeps the same URL — so an updated document means republishing, not
    minting a second page.
 
-Before publishing, check the things that fail silently: no unclosed tags, no class used but unstyled, no
-duplicate ids, every `url(#…)` resolving, and the diagram's node labels free of the characters that break
-rendering. If you cannot open the published page to look at it, say so rather than implying you did.
+Before publishing, run the checker on your working file:
+
+```bash
+bash assets/check-artifact.sh page.html
+```
+
+It asserts the things that fail silently: panels present and in order, the four board-consistency rules
+above, every in-page link and `url(#…)` resolving, ids unique, inlined SVGs well-formed, HTML balanced, no
+class used but unstyled, both themes defined, cards focusable, and no raw mermaid block. It validates the
+SVGs as XML separately from the HTML shell — a linter that treats `<path>` or `<rect>` as void elements
+reports hundreds of phantom errors on a page that is fine.
+
+The checker cannot see how the page *looks*. If you cannot open the published page, say so rather than
+implying you did.
 
 ## 9. Offer to publish
 
