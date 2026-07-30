@@ -43,9 +43,12 @@ Only when a standalone prototype has to be rebuilt inside the target codebase. D
 Every row needs an MVP fallback: the degraded version buildable today. That is what lets phase one ship the
 whole journey and be tested end to end. Write "none" only when there genuinely isn't one.
 
-| Custom capability | MVP fallback | Where it lands |
-|---|---|---|
-| [Behaviour, and what has to be built] | [The degraded version expressible with existing primitives] | [Package or app] |
+Label each one **client request**, **UX enhancement** or **nice-to-have**. That separates what someone is
+owed from what someone would like, which is what makes the list cuttable.
+
+| Custom capability | Kind | MVP fallback | Where it lands |
+|---|---|---|---|
+| [Behaviour, and what has to be built] | [client request / UX enhancement / nice-to-have] | [The degraded version expressible with existing primitives] | [Package or app] |
 
 ### Data and assets to move
 - [What is embedded in the prototype that has to live somewhere else, and where]

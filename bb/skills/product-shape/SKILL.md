@@ -106,6 +106,11 @@ Then sort every behaviour in the prototype into one of four buckets:
   document — it is what lets the first phase ship the *whole* journey on fallbacks and be tested end to end,
   instead of stalling until the custom work lands. If a behaviour genuinely has no fallback, say so; that is
   a real finding and it changes the sequencing.
+
+  Label each one **client request**, **UX enhancement** or **nice-to-have**. A client request carries an
+  obligation and needs a conversation before it is cut; the other two can be dropped on evidence. Teams
+  routinely build a UX enhancement ahead of a client request because it was more interesting, and this
+  column is what makes that visible.
 - **Data and assets to move** — anything embedded in the prototype that has to live somewhere else.
   Prototypes routinely inline datasets that belong on the server; say where each one goes.
 - **Dropped in translation** — what the platform version deliberately won't do, and why. Silence here
