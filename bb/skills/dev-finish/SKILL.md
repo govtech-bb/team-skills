@@ -100,7 +100,7 @@ When the human says **"clean up"** (or "wrap up and clean up") after work is
 committed, run these steps in order:
 
 1. **Push** the current branch to the remote.
-2. **Open a PR against `sandbox`** (the default base). If a GitHub issue was
+2. **Open a PR against the default base**. If a GitHub issue was
    referenced, include its number in the PR body.
 3. **Automatically remove the worktree** once the branch is pushed — no need to
    ask first.
