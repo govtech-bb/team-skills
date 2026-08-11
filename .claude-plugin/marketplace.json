@@ -8,6 +8,16 @@
       "name": "bb",
       "source": "./bb",
       "description": "Shared skills for GovTech Barbados, namespaced by discipline (dev-*, ops-*, sec-*)."
+    },
+    {
+      "name": "govbb",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/govtech-bb/govbb-design-system.git",
+        "path": "skills"
+      },
+      "description": "Skills for building with the GovBB Design System. Sourced from the design system itself, so they stay in step with it.",
+      "homepage": "https://design-system.service.alpha.gov.bb/ai-skills/"
     }
   ]
 }
