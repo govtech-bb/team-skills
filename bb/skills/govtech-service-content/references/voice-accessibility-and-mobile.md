@@ -487,6 +487,7 @@ Before finalising, check:
 - every necessary unfamiliar term is explained once
 - a separate plain-language pass has been completed for substantial drafts
 - no invented reassurance
+- benefits, payments, choices and outcomes are described factually without steering the user or implying an unconfirmed advantage
 - terminology is consistent
 - money, dates and time are consistent
 - content works on mobile
