@@ -123,16 +123,11 @@ Read:
 
 - [references/evidence-and-escalation.md](references/evidence-and-escalation.md)
 - [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
+- [references/content-style-guide.md](references/content-style-guide.md)
 
 When the requested output or journey is unclear, also read:
 
 - [references/content-decision-matrix.md](references/content-decision-matrix.md)
-
-### Public-facing content
-
-Also read:
-
-- [references/content-style-guide.md](references/content-style-guide.md)
 
 ### Entry, start, combined, routing, guidance or preparation page
 
@@ -306,9 +301,9 @@ Never use “ready to publish”.
 
 After drafting:
 
-1. run the plain-language and reading-age checks
-2. apply the GovTech content style guide to public-facing content
-3. run the accessibility and mobile checks
+1. run the plain-language and reading-age checks in [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
+2. apply the GovTech content style guide in [references/content-style-guide.md](references/content-style-guide.md)
+3. run the accessibility, mobile and shared QA checks in [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
 4. run the relevant specialist QA
 5. run journey-parity checks when several components exist
 6. check that a non-content user can understand the output and next action

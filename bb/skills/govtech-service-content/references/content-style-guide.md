@@ -160,7 +160,7 @@ Do not add a colon to a heading simply because a list appears below it.
 
 ## Semicolons
 
-Avoid semicolons. They can make sentences harder to read.
+Do not use semicolons in public-facing content. They are often misread.
 
 Use a full stop or a list instead.
 
@@ -177,13 +177,13 @@ For example:
 - self-employed worker
 - ex-gratia award
 
-Do not use a dash or hyphen for a date, time or number range. Use “to”.
+Do not use a dash or hyphen for a date, time or number range. Use 'to'.
 
 ## Ampersands and slashes
 
-Write “and” instead of using an ampersand, unless the ampersand is part of an official name.
+Write 'and' instead of using an ampersand, unless the ampersand is part of an official name.
 
-Write “or” instead of using a slash to show alternatives.
+Write 'or' instead of using a slash to show alternatives.
 
 Write:
 
@@ -219,7 +219,7 @@ Use apostrophes correctly in names and possessive words.
 
 Do not use an Oxford comma unless leaving it out could make the meaning unclear.
 
-Do not automatically add a comma because a sentence contains “and” or “but”. Add one only when it helps the sentence make sense.
+Do not automatically add a comma because a sentence contains 'and' or 'but'. Add one only when it helps the sentence make sense.
 
 ## Quotation marks
 
@@ -239,7 +239,9 @@ For bulleted lists:
 - include a lead-in when the bullet points depend on it
 - make sure each bullet reads naturally from the lead-in
 - begin each bullet in the same grammatical form
-- do not add “and” or “or” after individual bullet points
+- start a bullet with a lower-case letter when it is a phrase that runs on from the lead-in
+- start a bullet with a capital letter when it is a complete sentence
+- do not add 'and' or 'or' after individual bullet points
 - do not end bullet points with semicolons
 - do not mix short phrases and complete sentences in the same list
 
@@ -291,7 +293,7 @@ Do not use:
 
 Include the year when users could misunderstand which year is meant. You can leave it out when the surrounding content makes the year completely clear.
 
-Use “to” for date ranges.
+Use 'to' for date ranges.
 
 For example:
 
@@ -308,7 +310,7 @@ Avoid:
 
 Applications close next Friday.
 
-Use “on or before” when a deadline includes the date given and that meaning has been confirmed.
+Use 'on or before' when a deadline includes the date given and that meaning has been confirmed.
 
 For example:
 
@@ -325,13 +327,19 @@ It does not require us to change:
 
 ## Dates entered into a system
 
-Dates entered into a form follow the Ask for a date pattern, not the written-content date format.
+Collect a full date using 3 separate labelled fields, not a single text box or a numeric string:
 
-For example:
+- Day
+- Month
+- Year
 
-27 03 2012
+Users enter the day, month and year separately, and each field is labelled. This removes the ambiguity of a format like 27 03 2012, where it is not clear which number is the day and which is the month.
 
-The Ask for a date pattern covers the fields, hint text, validation and error messages.
+Hint text, validation and error messages follow the same 3-field structure.
+
+See [form-content.md](form-content.md) for the detailed form-field design.
+
+The order differs from written dates on purpose. Labelled Day, Month and Year fields remove ambiguity when a user enters a date. The written date format removes ambiguity when a date is displayed back in content. These are not competing rules.
 
 ## Times
 
@@ -352,7 +360,7 @@ Do not use:
 - 9am-5pm
 - 12 noon
 
-Use “to”, not a dash or hyphen, for a time range.
+Use 'to', not a dash or hyphen, for a time range.
 
 Use 11:59pm instead of midnight when users could misunderstand whether the deadline falls at the beginning or end of a date.
 
@@ -369,7 +377,7 @@ Use numerals for:
 
 Keep the unit beside the number.
 
-Use “to” for a number range.
+Use 'to' for a number range.
 
 For example:
 
@@ -394,7 +402,7 @@ Use:
 - BDS $100
 - BDS $60,000
 
-Do not mix “BDS $”, “BBD” and dollar-only formats within the same service unless it genuinely uses more than one currency.
+Do not mix 'BDS $', 'BBD' and dollar-only formats within the same service unless it genuinely uses more than one currency.
 
 ## Percentages
 
@@ -447,10 +455,27 @@ Before publishing or handing over the content, check:
 - Have semicolons, em dashes and en dashes been removed?
 - Are alternatives written using words instead of slashes?
 - Do written dates use the agreed format?
-- Do date input fields follow the Ask for a date pattern?
+- Do date input fields use separate labelled Day, Month and Year fields?
 - Are times, number ranges, money and percentages formatted consistently?
 - Are abbreviations written without full stops?
 - Has exact legal or prescribed wording been preserved?
+
+## Correcting and reporting style issues
+
+On a drafting or editing task, correct style-guide breaches silently, unless a change could affect legal, policy or service meaning.
+
+On a content or style review the user has asked for:
+
+- report the relevant style-guide breaches
+- give the corrected wording
+- do not silently rewrite content the user asked only to review
+
+On a broader service, form, journey or assurance review:
+
+- report repeated style problems
+- report problems that affect consistency, comprehension or usability
+- report anything that could change meaning
+- do not raise isolated cosmetic punctuation or formatting issues as yellow flags unless they materially affect the user experience
 
 ## When to ask for help
 
