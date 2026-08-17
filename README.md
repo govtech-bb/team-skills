@@ -48,7 +48,7 @@ bb/
     govtech-service-content/
       SKILL.md
       MODULE-CONTRACTS.md         ← module ownership map
-      references/                 ← 13 pattern & QA reference files
+      references/                 ← 14 pattern & QA reference files
       assets/                     ← handover & MDA-question templates
 README.md
 CONTRIBUTING.md

@@ -23,7 +23,7 @@ Use this order when sources conflict:
 3. approved GovTech content and service standards
 4. confirmed MDA facts
 5. approved live service content and forms
-6. current master prompts and reusable patterns
+6. current reusable patterns and approved templates
 7. previous drafts, examples and service-specific decisions
 8. notes and structural assumptions
 

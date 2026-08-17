@@ -47,6 +47,27 @@ Does not own:
 - form logic
 - audit scoring
 
+## content-style-guide.md
+
+Owns:
+
+- punctuation
+- capitalisation
+- written dates
+- times
+- numbers and ranges
+- money and percentages
+- abbreviations
+- list punctuation
+
+Does not own:
+
+- plain-English decisions
+- reading age
+- accessibility
+- page or form structure
+- service facts
+
 ## service-page-models.md
 
 Owns:
