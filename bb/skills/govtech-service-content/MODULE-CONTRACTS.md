@@ -85,6 +85,8 @@ Owns:
 
 - approved heading library
 - recommended heading sequences
+- GovBB platform page structures (certificate, licence and application)
+- the "Complete the form" route list rules, including the numbered list shape
 - certificate patterns and other specialist page patterns
 - CTA wording patterns
 - contact and help section patterns
