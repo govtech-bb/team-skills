@@ -113,7 +113,9 @@ committed, run these steps in order:
 5. **Offer to watch CI yourself.** Ask the human whether you should watch the
    PR's CI. If they say yes, run `gh pr checks <n> --watch` and **block until it
    finishes** — do not hand the build back to the human to follow. Then:
-   - **All checks green** → merge the PR.
+   - **All checks green** → report that the PR is ready for review. **Do not
+     merge it** — PRs need an approving review before they can merge, so
+     "watch then merge" is no longer an option.
    - **Any check fails** → investigate and fix the failures (push fixes to the
      same branch and re-watch), rather than just reporting them back.
 
