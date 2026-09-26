@@ -123,6 +123,7 @@ Read:
 
 - [references/evidence-and-escalation.md](references/evidence-and-escalation.md)
 - [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
+- [references/content-style-guide.md](references/content-style-guide.md)
 
 When the requested output or journey is unclear, also read:
 
@@ -197,7 +198,7 @@ For a formal MDA-question document, use:
 
 Do not load every reference by default.
 
-The reference files are the skill's operational knowledge base. Do not assume access to the source archive, Notion, earlier conversations or GovTech decisions that are not recorded in the skill or supplied for the current task.
+The reference files are the skill's operational knowledge base. Do not assume access to material that is not included in the skill or supplied for the current task.
 
 ## Recommend the content model
 
@@ -300,10 +301,12 @@ Never use “ready to publish”.
 
 After drafting:
 
-1. run the shared checks in the voice, accessibility and mobile reference
-2. run the relevant specialist QA
-3. run journey-parity checks when several components exist
-4. check that a non-content user can understand the output and next action
+1. run the plain-language and reading-age checks in [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
+2. apply the GovTech content style guide in [references/content-style-guide.md](references/content-style-guide.md)
+3. run the accessibility, mobile and shared QA checks in [references/voice-accessibility-and-mobile.md](references/voice-accessibility-and-mobile.md)
+4. run the relevant specialist QA
+5. run journey-parity checks when several components exist
+6. check that a non-content user can understand the output and next action
 
 Silently fix minor spelling, punctuation, grammar, formatting and obvious duplication.
 

@@ -277,7 +277,7 @@ Examples:
 
 - Enter the applicant’s first name.
 - Select whether the child takes medicine.
-- Enter a date before 17 July 2026.
+- Enter a date before July 17th, 2026.
 - Upload the health certificate.
 - Select no more than 3 camp locations.
 
