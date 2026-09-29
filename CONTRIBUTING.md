@@ -40,7 +40,39 @@ Skill names follow `<discipline>-<verb>`:
 
 Names should describe an action the user is taking. `dev-plan`, `content-review`, `security-audit` — not `dev-planner`, `content-reviewing-tool`, `security-auditor`.
 
-## Testing a skill locally before opening the PR
+## Add a new agent
+
+An agent is a subagent Claude dispatches to do one self-contained job in its own context window, then report back. Add one alongside a skill when the work should run apart from the main conversation — several in parallel (one per PR, one per file), or a job whose tool output would otherwise flood the session. If the instructions belong in the user's own session, write a skill instead.
+
+Create one file per agent under `bb/agents/`:
+
+```
+bb/agents/<agent-name>.md
+```
+
+### Frontmatter
+
+```yaml
+---
+name: <agent-name>
+description: <what the agent does, and who dispatches it or when>
+tools: Bash, Read, Grep, Glob   ← optional; omit to inherit every tool
+---
+```
+
+The `description` is what Claude reads to decide when to dispatch the agent, so name the skill that dispatches it, if any. Grant only the tools the job needs: a reviewing or researching agent rarely needs `Write` or `Edit`.
+
+The body is the agent's system prompt. It starts with no memory of the conversation, so it must say:
+
+- **Inputs** — what the dispatcher passes in (a PR number, a commit SHA, a file path).
+- **What it must not do** — especially anything outward-facing. An agent that drafts a PR review, a message or a commit should return it to the dispatcher, not post it.
+- **Output** — the exact parts of its report, in order, so the dispatcher can use it without re-reading the agent's work.
+
+### Naming
+
+Agents follow `<discipline>-<role>`: a noun for who does the job, since Claude dispatches them rather than the user invoking them. `dev-reviewer`, `content-checker`, `security-scanner`. They are available as `bb:<agent-name>`.
+
+## Testing a skill or agent locally before opening the PR
 
 You can install this repo as a local marketplace to try changes end-to-end:
 
@@ -49,7 +81,7 @@ You can install this repo as a local marketplace to try changes end-to-end:
 /plugin install bb@team-skills
 ```
 
-Reload Claude Code, invoke your skill, iterate. Remove the local marketplace before switching back to the official one:
+Reload Claude Code, invoke your skill, iterate. Check an agent is listed under `/agents`, then ask Claude to dispatch it on a real task. Remove the local marketplace before switching back to the official one:
 
 ```
 /plugin marketplace remove team-skills
@@ -58,7 +90,7 @@ Reload Claude Code, invoke your skill, iterate. Remove the local marketplace bef
 ## Opening a PR
 
 - Branch off `main`.
-- One coherent change per PR — a new skill, or a focused edit to an existing one.
+- One coherent change per PR — a new skill or agent, or a focused edit to an existing one.
 - In the PR description, say what the skill does and when a user would invoke it. If you tested it locally, mention the scenarios you tried.
 - Ensure that you update the version number in the `plugin.json` present in the `.claude-plugin` directory.
 
@@ -70,6 +102,12 @@ Reviewer should check:
 - Name follows the `<discipline>-<verb>` convention.
 - Content reads as **instructions to Claude**, not documentation *about* Claude.
 - The skill contains steps that will be relevant to everyone every time a task is carried out, and that we want to be consistent for the whole team
+
+For an agent, also check:
+
+- Name follows the `<discipline>-<role>` convention.
+- `tools` grants no more than the job needs.
+- The body states its inputs, what it must not do, and the shape of its output.
 
 ## Updating an existing skill
 
