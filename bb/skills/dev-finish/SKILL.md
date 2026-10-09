@@ -88,6 +88,17 @@ Run the project's test suite and any lint or type-check it uses.
 - If worktrees were used, inform the user which branch the implemented feature should be merged into. If no branch currently exists that matches the work done, and the user has not provided a branch name to use, then confirm with the user what branch to "branch off of", create it, and then merge the changes into that branch.
 - If a github issue was referenced, inform the user of which issue was being targeted, provide a link to it, and remove the "progressing" label from it. 
 
+## 7. Tick off the related issue's acceptance criteria
+
+Find the GitHub issue this work relates to — one referenced in the session or plan, or in the branch name. If none was referenced, search (`gh issue list --search "<keywords>"`) and confirm the match with the user before touching it. No related issue → skip this step.
+
+Read it with `gh issue view <n> --json body`. If it has an acceptance-criteria checklist (`- [ ]` items):
+
+1. **Check off what this work completed.** Change `- [ ]` to `- [x]` only for items the committed work fully satisfies — partial work stays unchecked. Leave the rest of the body untouched, then write it back with `gh issue edit <n> --body-file <file>`.
+2. **Comment with the extra work.** If the session completed work that isn't on the checklist, post one `gh issue comment <n>` listing it. Don't list what's still outstanding — the unchecked items already show that. Nothing extra → no comment.
+
+If the issue has no checklist, skip this step.
+
 After committing, hand back to the user. Pushing is the user's call.
 
 If the user asks you to push, and open a PR, ensure that if a GitHub issue was referenced, the GitHub issue number is a part of the PR body.
