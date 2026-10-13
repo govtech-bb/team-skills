@@ -21,18 +21,36 @@ verifies and posts them. Don't re-derive what they already produced.
 
 ```bash
 N=123                                   # the PR under review
+T=/path/to/scratch                      # your session scratchpad, else $(mktemp -d) — write it down
 R=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-B=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)
+B=$(gh pr view $N --repo $R --json baseRefName -q .baseRefName)
+AUTHOR=$(gh pr view $N --repo $R --json author -q .author.login)
 ME=$(gh api user -q .login)
-T=$(mktemp -d)
 git fetch origin "$B" "pull/$N/head"    # refresh the base too, or merge-base lies
 HEAD_SHA=$(gh pr view $N --repo $R --json headRefOid -q .headRefOid)
 BASE_SHA=$(git merge-base "origin/$B" "$HEAD_SHA")
+printf '%s\n' "N=$N" "T=$T" "R=$R" "B=$B" "AUTHOR=$AUTHOR" "ME=$ME" \
+  "HEAD_SHA=$HEAD_SHA" "BASE_SHA=$BASE_SHA" > "$T/env"
 ```
 
+**Each shell call starts fresh** — the variables above are gone by the next one. Start every later
+block with `. <T>/env`, writing the scratch path out literally. Without it `$HEAD_SHA` is empty: the
+"head moved" guard compares against nothing and `commit_id` posts as `""`.
+
 A stale `origin/$B` yields a base older than the true one, which inflates the diff and makes
-pre-existing code read as new — the error this skill exists to prevent. If the PR targets a branch
-other than the default, use its `baseRefName` for `B`.
+pre-existing code read as new — the error this skill exists to prevent.
+
+Then read what the PR claims and what it was asked to do:
+
+```bash
+gh pr view $N --repo $R --json title,body,closingIssuesReferences \
+  --jq '.title, .body, (.closingIssuesReferences[].number)'
+gh issue view <n> --repo $R             # each linked issue
+```
+
+The description's claims are things to verify, not facts. A linked issue's acceptance criteria
+are review criteria: one the PR leaves unmet is a defect, unless the description says it is
+deferred and why.
 
 Check against the SHA, not the working tree — it may predate the base:
 
@@ -41,16 +59,40 @@ git grep -n "<symbol>" "$HEAD_SHA" -- src/   # right
 grep -rn "<symbol>" src/                     # wrong — whatever is checked out
 ```
 
-**Several PRs at once:** fetch every head in one command, then dispatch one `bb:dev-reviewer` agent
-per PR with its `N`, `HEAD_SHA` and `BASE_SHA`. Parallel `git fetch` into one repo races on ref
-locks, and the agents only read via `git show`/`git grep`, so the SHAs are all they need. Each
-agent returns a draft; you post (section 4).
+## 2. Get findings
+
+If findings were handed to you (from `/code-review` or another pass), they are your input — go to
+*Sort findings*. Otherwise, dispatch one `bb:dev-reviewer` for the PR: its tool output stays out of
+your context and it returns a draft with a verification log. Reviewing the diff yourself is fine for
+a small PR.
+
+**Several PRs at once:** fetch every head in one command, then dispatch one `bb:dev-reviewer` per
+PR, all in the same message. Parallel `git fetch` into one repo races on ref locks, and the agents
+only read via `git show`/`git grep`, so the SHAs are all they need.
 
 ```bash
 git fetch origin "$B" pull/193/head pull/382/head pull/421/head
 ```
 
-## 2. Sort findings
+Dispatch each agent with this prompt, filled in:
+
+```markdown
+Review PR #<N> in <R>. Return your draft; do not post anything.
+
+- HEAD_SHA: <sha>
+- BASE_SHA: <sha>
+- Linked issues: <#n, … | none>
+- Guidance from the user: <their focus, or none>
+- Handed-down findings to verify: <list with path:line, or none>
+- Your earlier review's open threads: <path:line — gist, or none>
+```
+
+**Check the draft before you use it.** Re-run the evidence command for every `Fabricated` and
+`Pre-existing` line in the agent's verification log, and for one `Real` line. These are the verdicts
+that drop or soften a finding, so a wrong one costs most. If a check disagrees, the draft is wrong:
+fix it, don't post around it.
+
+## 3. Sort findings
 
 ### Re-reviews
 
@@ -115,7 +157,7 @@ order.
 If something out of scope genuinely should block, say why it cannot wait; otherwise it is a
 follow-up, and naming it as one is what keeps the PR reviewable.
 
-## 3. Decide
+## 4. Decide
 
 **Approve only if you would merge as-is.** Split what each finding asks of the author:
 
@@ -129,27 +171,73 @@ follow-up, and naming it as one is what keeps the PR reviewable.
 Either way the body says which findings block and which don't, so a later change of verdict is one
 sentence, not a rework of the threads.
 
+**Check CI and mergeability before approving.** "Would merge as-is" includes the checks:
+
+```bash
+gh pr checks $N --repo $R
+gh pr view $N --repo $R --json mergeable,mergeStateStatus
+```
+
+`UNKNOWN` means GitHub hasn't computed it yet; query again after a few seconds.
+
+Don't approve over failing or pending required checks: say in the body what you are waiting on. A
+`CONFLICTING` PR runs little or no CI, so its green is not evidence. If the PR lists no checks at
+all, its base branch has no CI. In that case build and test `$HEAD_SHA` yourself in a scratch
+worktree before approving, or say plainly in the body that you didn't.
+
+**Your own PR:** if `$AUTHOR` = `$ME`, GitHub rejects `APPROVE` and `REQUEST_CHANGES` with a 422.
+Post with `"event":"COMMENT"`, and have the body say which findings would block, since a comment
+carries no verdict.
+
 Show the user the verdict, summary and comments before posting. Posting is public.
 
-## 4. Post
+## 5. Post
 
 **One review, carrying every comment.** Post the verdict and all inline comments in a single
 `POST .../reviews` with a `comments[]` array. This is the only way new findings end up attached to
-the verdict:
+the verdict.
 
-```bash
-cat > $T/r.json <<'JSON'
+Write the draft to `<T>/r.json` with your file-writing tool rather than a shell heredoc, which some
+harnesses refuse:
+
+```json
 {"event":"REQUEST_CHANGES","body":"<summary>","comments":[
   {"path":"<path>","line":<n>,"side":"RIGHT","body":"..."},
   {"path":"<path>","line":<n>,"side":"RIGHT","body":"..."}]}
-JSON
-[ "$(gh pr view $N --repo $R --json headRefOid -q .headRefOid)" = "$HEAD_SHA" ] || echo "head moved — re-verify first"
+```
+
+**Check every anchor before posting.** One `line` outside the diff and GitHub rejects the whole
+review ("Line could not be resolved"). Only lines inside a hunk of the merge-base diff, changed or
+context, can be anchored:
+
+```bash
+. <T>/env
+jq -r '.comments[] | "\(.path) \(.line)"' $T/r.json | while read -r p l; do
+  git diff "$BASE_SHA" "$HEAD_SHA" -- "$p" | awk -v l="$l" -v p="$p" '
+    /^@@/ { split($3, a, /[+,]/); s = a[2]; n = (a[3] == "" ? 1 : a[3]); if (l >= s && l < s + n) ok = 1 }
+    END   { if (!ok) print "not in diff: " p ":" l }'
+done                                    # want no output
+```
+
+Move any line it prints into the summary as `file:line`. Then post:
+
+```bash
+. <T>/env
+[ -n "$HEAD_SHA" ] && [ "$(gh pr view $N --repo $R --json headRefOid -q .headRefOid)" = "$HEAD_SHA" ] || { echo "head moved (or env not loaded) — re-verify first"; exit 1; }
 jq --arg c "$HEAD_SHA" '. + {commit_id: $c}' $T/r.json > $T/post.json
-RID=$(gh api repos/$R/pulls/$N/reviews --input $T/post.json --jq .id)
+RID=$(gh api repos/$R/pulls/$N/reviews --input $T/post.json --jq .id); echo "RID=$RID" >> $T/env
 ```
 
 `commit_id` pins every anchor to the commit you verified against. Without it GitHub anchors to the
 head at post time, which may not be the one you read.
+
+If the post fails with "can only have one pending review", an earlier attempt left an unsubmitted
+draft of yours. Find it, check it holds nothing you need, delete it, and post again:
+
+```bash
+gh api --paginate repos/$R/pulls/$N/reviews --jq ".[] | select(.user.login==\"$ME\" and .state==\"PENDING\") | .id"
+gh api -X DELETE repos/$R/pulls/$N/reviews/<id>
+```
 
 **Never `POST .../comments` to raise a new finding.** That endpoint wraps each comment in its own
 implicit `COMMENTED` review, so the comments detach from your verdict and the PR fills with

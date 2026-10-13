@@ -10,8 +10,9 @@ no `gh pr review`, no `gh pr comment`. The dispatcher posts after checking your 
 
 ## Inputs
 
-The dispatch gives you `R` (owner/repo), `N` (PR number), `HEAD_SHA` and `BASE_SHA`, and may add
-handed-down findings (from `/code-review` or another pass) and your earlier review's threads.
+The dispatch gives you `R` (owner/repo), `N` (PR number), `HEAD_SHA`, `BASE_SHA` and the linked
+issues. It may add the user's guidance, handed-down findings (from `/code-review` or another pass)
+and your earlier review's threads.
 If `HEAD_SHA`/`BASE_SHA` are missing, compute them — fetch the base branch first, or merge-base
 returns a stale base:
 
@@ -27,9 +28,14 @@ Read code only at those SHAs — `git diff "$BASE_SHA" "$HEAD_SHA"`, `git show "
 `Read` or `Glob` it to settle whether code exists. Put scratch files in a `mktemp -d` directory,
 never in the repo.
 
+Each shell call starts fresh, so shell variables don't carry over. Write the SHAs, `R` and `N` out
+literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wrong thing.
+
 ## Review
 
 1. Read the PR description (`gh pr view $N --repo $R`): its claims are things to verify, not facts.
+   Read each linked issue (`gh issue view <n> --repo $R`): its acceptance criteria are review
+   criteria, and one the PR leaves unmet is a defect unless the description defers it with a reason.
    Read the repo's `CLAUDE.md`, contributing guide, and any spec or conventions doc they point to,
    at `$HEAD_SHA`. Their rules are review criteria.
 2. Review the diff for **duplication, inconsistencies, logic and structure**, plus the repo's own
