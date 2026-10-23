@@ -59,7 +59,7 @@ bb/
     standup/SKILL.md
     deliverables-summary/
       SKILL.md
-      scripts/                    ← period dates, GitHub activity, calendar export reader
+      scripts/                    ← period dates and GitHub activity
     govtech-service-content/
       SKILL.md
       MODULE-CONTRACTS.md         ← module ownership map

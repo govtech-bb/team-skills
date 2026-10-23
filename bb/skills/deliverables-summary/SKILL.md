@@ -15,7 +15,7 @@ The skill does not read Slack or other chat tools, even if a connector is availa
 
 - **Python 3**, for the bundled scripts (standard library only), and **`gh`** signed in with access to the user's GitHub organisation.
 - **The Claude Docs connector**, for the work log. If its tools aren't available, say so and offer to write the period's summary as a Markdown file instead.
-- **The Google Calendar connector**, for meetings, connected through `/mcp` with calendar access granted. Without it, the skill reads a calendar export instead (see step 2).
+- **The Google Calendar connector**, for meetings, connected through `/mcp` with calendar access granted. Without it, the summary has no meetings, so help the user connect it first.
 
 ## Configuration
 
@@ -28,7 +28,6 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
   "githubOrgs": ["govtech-bb"],
   "repoRoots": ["~/Documents/Projects"],
   "calendarEmail": "first.last@govtech.bb",
-  "calendarSource": "connector",
   "name": "First Last",
   "role": "Frontend Developer, GovTech Barbados",
   "preferences": {}
@@ -40,7 +39,6 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 - `githubOrgs` is where the skill looks for the user's work: every repo in these GitHub organisations, whether or not it's cloned locally. It also keeps personal and side-project repos out of an HR document. Someone who doesn't work in code (a designer, a delivery manager) can leave it empty, and the code source is skipped.
 - `repoRoots` is optional. Local folders only add work that hasn't reached GitHub yet (unpushed commits).
 - `calendarEmail` is the address the user's invites go to. It's how the skill finds their RSVP, so declined meetings are dropped.
-- `calendarSource` is `connector` (the default: read the calendar through the Google Calendar connector). The fallbacks, for when the connector isn't available, are a folder where calendar exports land (usually `~/Downloads`) or the calendar's secret iCal URL. Treat that URL like a password: never print it or put it in the doc.
 - `name` goes in each tab's heading. `role` is optional and only used if the user asks for it somewhere.
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
   - `countUnansweredInvites` (ask): if true, count unanswered invites as attended instead of asking. Many people never reply to recurring team meetings.
@@ -54,7 +52,7 @@ If the file is missing or has no `invoiceDay`, ask for these before doing anythi
 
 1. **Invoice day:** "What day of the month does your invoice period start? (e.g. 23)". Accept "the 23rd" or "23". Reject anything outside 1–31.
 2. **Work-log doc:** do they already have a work-log Claude Doc (ask for the link), or should one be created on the first summary?
-3. **Calendar:** their work email. If the Google Calendar connector is connected, save `connector`. If it isn't, ask whether they can connect it (`/mcp`); otherwise they can export the calendar each time (saved as `~/Downloads`) or give a secret iCal address (see "Meetings" below).
+3. **Calendar:** their work email, and check the Google Calendar connector is connected with calendar access. If it isn't, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
 4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it. Optionally, the local folders that hold their clones, to catch work not yet pushed.
 5. **Name** for the heading, and optionally their role. The git `user.name` and the logged-in email are reasonable defaults to offer.
 
@@ -91,7 +89,7 @@ GitHub is the source of truth: the script searches every repo in the organisatio
 
 ### Meetings: Google Calendar
 
-**Through the connector (the default).** Use the Google Calendar connector's `list_events` on the primary calendar:
+Use the Google Calendar connector's `list_events` on the primary calendar:
 - `startTime` = `<start_date>T00:00:00` and `endTime` = `<end_exclusive_date>T00:00:00`, with no offset; the server applies the user's time zone
 - `orderBy` = `startTime`, `pageSize` = 250, `eventType` = `["DEFAULT", "OUT_OF_OFFICE", "FOCUS_TIME"]`
 - follow `nextPageToken` until it runs out
@@ -105,28 +103,16 @@ Read each event like this:
 - **Recurring:** an event with `recurringEventId` is one occurrence of a series. Group occurrences by title, because Google splits a series into new ids each time it's edited.
 - **Purpose** comes from the `summary`, the `description` (strip the HTML and the video-call joining text), the attendee domains and the `location`.
 
-This gives the same summary the export script produces: meeting count and hours, recurring series with counts, one-off meetings, and all-day events.
+From this, build the meeting summary: meeting count and hours, recurring series with counts, one-off meetings, and all-day events.
 
 **Read only. Never open attachments.** The connector can also create, change, delete and respond to events. This skill never does any of that. Events often carry meeting recordings and AI meeting notes as attachments. Don't open them: they hold what people said in the meeting, which is the same kind of sensitive content the user kept Slack out for. The title, description and attendee list are enough to say what a meeting was for.
 
-**If the connector isn't available** (not connected, or an "Insufficient scope" error, which means calendar access wasn't granted when the user signed in): tell the user how to fix it ("run `/mcp`, choose claude.ai Google Calendar, reconnect, and tick the calendar permission"). Then fall back to the export below rather than leaving meetings out.
-
-**Fallback: a calendar export.** If `calendarSource` is a URL, use it directly. If it's a folder (or `connector`, in which case look in `~/Downloads`), use the newest `*.ics` or `*.ical.zip` file in it. Google names exports after the email address, e.g. `first.last@govtech.bb.ical.zip`. If there isn't one, or the newest is older than the period's last day, ask the user to export a fresh one and wait:
-
-> In Google Calendar on the web: ⚙ Settings → **Import & export** → **Export**. It downloads a .zip to your Downloads folder. Tell me when it's there.
-
-An export is a snapshot. Meetings added or moved after it was downloaded are missing or wrong, which is why the connector is preferred.
-
-```bash
-python3 <skill>/scripts/calendar_events.py --source <file or URL> --since <start_date> --until <end_exclusive_date> --me <calendarEmail>
-```
-
-The script expands recurring meetings, applies skipped and moved occurrences, and drops cancelled events, events the user declined and events marked free. It returns the same summary as above: meeting count and hours, recurring series with counts, one-off meetings (title, time, length, attendee domains, short description) and all-day events.
+**If the connector isn't available** (not connected, or an "Insufficient scope" error, which means calendar access wasn't granted when the user signed in): tell the user how to fix it ("run `/mcp`, choose claude.ai Google Calendar, reconnect, and tick the calendar permission"). Carry on with the other sources, and say plainly in the draft and the final reply that meetings are missing, so the summary isn't mistaken for complete.
 
 Then:
 
 - Drop anything that isn't work, and recompute the hours without it. That means placeholder blocks the user made for themselves ("Lunch", "Focus time", "Hold", "Commute": usually no other attendees, often recurring), personal bookings (tickets, travel, weekend plans), and team socials such as a team lunch out.
-- An invite the user never answered (`needsAction` / `NEEDS-ACTION`) doesn't prove they went, especially a large one-off session. Unless `preferences.countUnansweredInvites` is true, list the bigger unanswered ones in step 4 and ask which they actually attended, rather than assuming. Either way, ask what they presented or ran: the calendar can't show that.
+- An invite the user never answered (`needsAction`) doesn't prove they went, especially a large one-off session. Unless `preferences.countUnansweredInvites` is true, list the bigger unanswered ones in step 4 and ask which they actually attended, rather than assuming. Either way, ask what they presented or ran: the calendar can't show that.
 - Check the all-day events for leave, sick days, public holidays or training days. Don't put them in the summary, but mention any that look like time off in step 4 so the user can decide whether the invoice should note them.
 - Recurring series become one line each with a count ("Daily stand-ups ×21"). They show steady participation, but listing them one by one buries the meetings that matter.
 - Pick out the one-off meetings that carry outcomes: workshops, user research sessions, show-and-tells, stakeholder or MDA meetings, demos, onboarding or training given, and interviews. Use the title, description and attendee domains to work out the purpose. For example, a `*.gov.bb` domain other than the user's own points to a meeting with a ministry or department.
@@ -227,7 +213,7 @@ When the user asks to export a period, use the docs connector's export on **that
 
 When the user wants a run of past periods, such as every month since they started:
 
-1. **Find where the history starts.** Look for the earliest work in each source: the earliest PR in `githubOrgs`, the earliest commit, and the earliest event in the calendar export. Ask the user for their start date if the first period would only be partly covered. Tell them which months have no calendar data, because the export may not reach back that far.
+1. **Find where the history starts.** Look for the earliest work in each source: the earliest PR in `githubOrgs`, the earliest commit, and the earliest event in the calendar. Ask the user for their start date if the first period would only be partly covered. Tell them which months have no calendar data.
 2. **Gather and draft each period separately**, in parallel. Use one subagent per period if you can. Each one runs both scripts for its window, follows steps 2 and 3, and returns a draft in the period tab layout, plus its own questions: large unanswered invites, possible leave, and gaps such as weeks with no activity. Drafting period by period keeps work from one month leaking into another.
 3. **Run step 4 once for the whole run**, not once per period. Show a short outline of every period (main focus plus 3–5 headline deliverables), then the questions grouped by period. Asking seven separate times wears the user out.
 4. **Write one tab per period** with its own order key, plus one Overview row each. Thinly covered months still get a tab. Say what's thin in the lead ("Calendar records start in April, so meetings for this period aren't listed"), rather than padding.
