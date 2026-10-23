@@ -192,7 +192,7 @@ Fill the period tab one section at a time with pending blocks, as the docs conne
 Use this layout every time, so tabs are consistent across months and HR knows where to look:
 
 ```
-# Work summary: <period label>
+# <name> - Deliverables Summary - <period label>
 <as-of date chip> · <the user, as a mention chip>
 
 <Lead: 2–3 sentences, starting with name and role, then the period's main focus and its most significant outcomes.>
@@ -219,7 +219,7 @@ Leave out any section with nothing in it, except Deliverables. There is no separ
 
 ### Exporting for an invoice
 
-When the user asks to export a period, use the docs connector's export on **that period's tab only**, as PDF or Word (docx), whichever they say. Save the file where they ask, defaulting to `~/Downloads/Work summary <period label>.<ext>`. The PR links stay in the export, because they're the evidence behind each claim.
+When the user asks to export a period, use the docs connector's export on **that period's tab only**, as PDF or Word (docx), whichever they say. Save the file where they ask, defaulting to `~/Downloads/<name> - Deliverables Summary - <period label>.<ext>`. The PR links stay in the export, because they're the evidence behind each claim.
 
 ## Back-filling several periods
 
