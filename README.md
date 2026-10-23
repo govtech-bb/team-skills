@@ -29,6 +29,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-finish` | You're ready to wrap up — tests, docs, decisions worth recording, commit |
 | `/bb:dev-review` | You're reviewing a PR (or relaying `/code-review` findings) and want every finding verified against the PR's head commit, then posted as one review |
 | `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
+| `/bb:deliverables-summary` | You're invoicing, or HR wants a record of your work, and you want a plain-language summary of one invoice period (code, meetings and what you add), kept as a tab per period in a running Claude Doc |
 | `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages — and want content-design guidance plus a QA gate |
 | `/bb:content-aegis` | **Content AEGIS 3.3** — the same GovTech service-content drafting and review, run as an assurance workflow (role awareness, evidence and Content Design oversight). Runs **alongside** `/bb:govtech-service-content` during a transition; invoked explicitly only (it does not auto-trigger). |
 
@@ -56,6 +57,9 @@ bb/
       SKILL.md
       references/worked-examples.md
     standup/SKILL.md
+    deliverables-summary/
+      SKILL.md
+      scripts/                    ← period dates and GitHub activity
     govtech-service-content/
       SKILL.md
       MODULE-CONTRACTS.md         ← module ownership map
