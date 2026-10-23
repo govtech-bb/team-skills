@@ -1,9 +1,9 @@
 ---
-name: invoice-summary
-description: Build a plain-language summary of everything the user delivered during one invoice period (from their invoice day in one month to the day before it in the next), drawn from git commits and PRs and the user's Google Calendar, plus what the user adds, then add it as a new tab in their running Claude Doc work log so HR or a manager can see the work behind an invoice. Use this whenever the user asks for an invoice summary, monthly work summary, timesheet narrative, "what did I do this month", a record of work for HR or payroll, or wants to update their work log, even if they don't say "invoice". Also use it to change their saved invoice day, doc or sources ("change my invoice date"). Not for daily standups (use /bb:standup) or weeknotes. Use when the user invokes /bb:invoice-summary.
+name: deliverables-summary
+description: Build a plain-language summary of everything the user delivered during one invoice period (from their invoice day in one month to the day before it in the next), drawn from git commits and PRs and the user's Google Calendar, plus what the user adds, then add it as a new tab in their running Claude Doc work log so HR or a manager can see the work behind an invoice. Use this whenever the user asks for a deliverables summary, an invoice summary, monthly work summary, timesheet narrative, "what did I do this month", a record of work for HR or payroll, or wants to update their work log, even if they don't say "invoice". Also use it to change their saved invoice day, doc or sources ("change my invoice date"). Not for daily standups (use /bb:standup) or weeknotes. Use when the user invokes /bb:deliverables-summary.
 ---
 
-# Invoice summary
+# Deliverables summary
 
 The reader is HR, a manager or finance, not an engineer. They need to understand what was delivered in the period and why it mattered, so they can match it to an invoice. The user also keeps every period's summary as a permanent record. That's why output goes into **one running Claude Doc with a tab per period**: each tab can be exported on its own for an invoice, and together they form the history.
 
@@ -19,7 +19,7 @@ The skill does not read Slack or other chat tools, even if a connector is availa
 
 ## Configuration
 
-Settings live in `~/.claude/invoice-summary-config.json`, which is global and owned by the user:
+Settings live in `~/.claude/deliverables-summary-config.json`, which is global and owned by the user:
 
 ```json
 {
@@ -180,7 +180,7 @@ The work log is a **Claude Doc**: one running doc with a tab per period, and eac
 The order key sorts newer periods first without renumbering older tabs. Every tab needs an explicit order, because unordered tabs land in no useful position.
 
 **Cases:**
-- **No `docUrl` yet:** create the doc titled "Work log — <name>" with the Overview tab and this period's tab at birth. Open it for the user, then save its link to the config file.
+- **No `docUrl` yet:** create the doc titled "<name> - Deliverables Summary" (its Overview tab's heading too) with the Overview tab and this period's tab at birth. Open it for the user, then save its link to the config file.
 - **`docUrl` exists:** read the doc's tab list. Add the period's tab with its order key, and add a row to the Overview table.
 - **The period already has a tab** (a re-run): ask whether to replace its contents. If yes, replace the contents of that same tab and update its Overview row. Never add a second tab for a period, and never delete and recreate one.
 - Add "(in progress)" to the tab name when it's the current period. Rename the tab when the period is summarised again after it closes.
