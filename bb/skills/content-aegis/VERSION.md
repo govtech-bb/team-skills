@@ -2,8 +2,9 @@
 
 Version: **3.3.0**
 Product: **Content AEGIS**
-Release status: **candidate awaiting Claude acceptance testing and GovTech approval**
 Skill identifier: `content-aegis`
+
+Content AEGIS, the skill, is versioned as **3.3.0**. It ships inside the shared `bb` plugin, which is versioned separately as **0.1.13**. The two numbers track different things: the skill's own releases and the plugin bundle's releases.
 
 This package contains GovTech Barbados service-content drafting and review guidance, reference materials, QA checks and handover templates.
 
