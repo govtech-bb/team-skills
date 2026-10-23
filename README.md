@@ -30,6 +30,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 | `/bb:dev-review` | You're reviewing a PR (or relaying `/code-review` findings) and want every finding verified against the PR's head commit, then posted as one review |
 | `/bb:standup` | You want a bulleted recap of what you've shipped since your last standup, ready to read aloud |
 | `/bb:govtech-service-content` | You're building, reviewing, auditing or preparing GovTech service content — pages, forms, confirmation screens, MDA pages — and want content-design guidance plus a QA gate |
+| `/bb:content-aegis` | **Content AEGIS 3.3** — the same GovTech service-content drafting and review, run as an assurance workflow (role awareness, evidence and Content Design oversight). Runs **alongside** `/bb:govtech-service-content` during a transition; invoked explicitly only (it does not auto-trigger). |
 
 | Agent | Use it when |
 |---|---|
@@ -60,6 +61,12 @@ bb/
       MODULE-CONTRACTS.md         ← module ownership map
       references/                 ← 13 pattern & QA reference files
       assets/                     ← handover & MDA-question templates
+    content-aegis/                ← Content AEGIS 3.3, parallel to govtech-service-content
+      SKILL.md
+      MODULE-CONTRACTS.md
+      VERSION.md
+      references/                 ← 14 pattern & QA reference files
+      assets/                     ← templates + icon
 README.md
 CONTRIBUTING.md
 ```

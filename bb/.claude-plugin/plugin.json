@@ -1,5 +1,5 @@
 {
   "name": "bb",
-  "description": "Shared skills for GovTech Barbados, namespaced by discipline (dev-*, ops-*, sec-*).",
-  "version": "0.1.12"
+  "description": "Shared Claude Code skills for GovTech Barbados, spanning development workflow, standups, and content design: service content and the Content AEGIS review.",
+  "version": "0.1.13"
 }
