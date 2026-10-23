@@ -48,15 +48,21 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 
 ### First run, or "change my invoice date"
 
-If the file is missing or has no `invoiceDay`, ask for these before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop.
+If the file is missing or has no `invoiceDay`, set up before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop.
+
+**First, check what the skill needs**, so nothing fails halfway through the first summary: `gh auth status` (signed in, with access to their organisation), that the Claude Docs tools are available, and that the Google Calendar connector can read events (a one-day `list_events` call is enough). Tell the user what's missing and how to fix it, in one short list. They can carry on without a source, but say what the summary will lack.
+
+Then ask these, together in one message rather than one at a time:
 
 1. **Invoice day:** "What day of the month does your invoice period start? (e.g. 23)". Accept "the 23rd" or "23". Reject anything outside 1–31.
 2. **Work-log doc:** do they already have a work-log Claude Doc (ask for the link), or should one be created on the first summary?
-3. **Calendar:** their work email, and check the Google Calendar connector is connected with calendar access. If it isn't, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
+3. **Calendar email:** offer the email of the account they're signed in with as the default, and ask only if it isn't their work address. If the calendar check failed, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
 4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it. Optionally, the local folders that hold their clones, to catch work not yet pushed.
 5. **Name** for the heading, and optionally their role. The git `user.name` and the logged-in email are reasonable defaults to offer.
 
 Write the file with whatever tool fits, then show the user what was saved.
+
+**Then ask how far back to go:** "Just the latest period, or every month since you started?" Someone new to the skill usually has months of work with no record. For every month, follow [Back-filling several periods](#back-filling-several-periods).
 
 ## Step 1: Pick the period
 
@@ -105,7 +111,7 @@ Read each event like this:
 
 From this, build the meeting summary: meeting count and hours, recurring series with counts, one-off meetings, and all-day events.
 
-**Read only. Never open attachments.** The connector can also create, change, delete and respond to events. This skill never does any of that. Events often carry meeting recordings and AI meeting notes as attachments. Don't open them: they hold what people said in the meeting, which is the same kind of sensitive content the user kept Slack out for. The title, description and attendee list are enough to say what a meeting was for.
+**Read only. Never open attachments.** The connector can also create, change, delete and respond to events. This skill never does any of that. Events often carry meeting recordings and AI meeting notes as attachments. Don't open them: they hold what people said in the meeting, for the same reason the skill doesn't read Slack. The title, description and attendee list are enough to say what a meeting was for.
 
 **If the connector isn't available** (not connected, or an "Insufficient scope" error, which means calendar access wasn't granted when the user signed in): tell the user how to fix it ("run `/mcp`, choose claude.ai Google Calendar, reconnect, and tick the calendar permission"). Carry on with the other sources, and say plainly in the draft and the final reply that meetings are missing, so the summary isn't mistaken for complete.
 
