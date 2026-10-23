@@ -177,15 +177,15 @@ The work log is a **Claude Doc**: one running doc with a tab per period, and eac
 | Tab | Order key | Holds |
 |---|---|---|
 | Overview | `a0` | One line on what the log is, then a table with one row per period, newest first: period (a link chip to its tab), main focus in one line, and meeting hours. |
-| One per period, e.g. `23 Sep – 22 Oct 2026` | `b` + (99999999 − the start date as YYYYMMDD), e.g. `b79739076` for 2026-09-23 | That period's summary, laid out as below. |
+| One per period, named exactly like its heading, e.g. `First Last - Deliverables Summary - 23 Sep – 22 Oct 2026` | `b` + (99999999 − the start date as YYYYMMDD), e.g. `b79739076` for 2026-09-23 | That period's summary, laid out as below. |
 
-The order key sorts newer periods first without renumbering older tabs. Every tab needs an explicit order, because unordered tabs land in no useful position.
+The tab name is what an exported PDF or Word file takes as its title and file name, so it must match the tab's heading word for word. The order key sorts newer periods first without renumbering older tabs. Every tab needs an explicit order, because unordered tabs land in no useful position.
 
 **Cases:**
 - **No `docUrl` yet:** create the doc titled "<name> - Deliverables Summary" (its Overview tab's heading too) with the Overview tab and this period's tab at birth. Open it for the user, then save its link to the config file.
 - **`docUrl` exists:** read the doc's tab list. Add the period's tab with its order key, and add a row to the Overview table.
 - **The period already has a tab** (a re-run): ask whether to replace its contents. If yes, replace the contents of that same tab and update its Overview row. Never add a second tab for a period, and never delete and recreate one.
-- Add "(in progress)" to the tab name when it's the current period. Rename the tab when the period is summarised again after it closes.
+- Add " (in progress)" to the end of the tab name (and the heading) when it's the current period, and remove it from both when the period is summarised again after it closes.
 
 Fill the period tab one section at a time with pending blocks, as the docs connector describes. The user is usually watching it fill.
 
