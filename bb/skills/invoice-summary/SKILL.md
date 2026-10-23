@@ -41,7 +41,7 @@ Settings live in `~/.claude/invoice-summary-config.json`, which is global and ow
 - `repoRoots` is optional. Local folders only add work that hasn't reached GitHub yet (unpushed commits).
 - `calendarEmail` is the address the user's invites go to. It's how the skill finds their RSVP, so declined meetings are dropped.
 - `calendarSource` is `connector` (the default: read the calendar through the Google Calendar connector). The fallbacks, for when the connector isn't available, are a folder where calendar exports land (usually `~/Downloads`) or the calendar's secret iCal URL. Treat that URL like a password: never print it or put it in the doc.
-- `name` and `role` go in each tab's heading.
+- `name` goes in each tab's heading. `role` is optional and only used if the user asks for it somewhere.
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
   - `countUnansweredInvites` (ask): if true, count unanswered invites as attended instead of asking. Many people never reply to recurring team meetings.
   - `noteLeave` (false): if false, never mention leave or time off, including as the reason for a handover. Leave is personal, so it only goes in when the user says so.
@@ -56,7 +56,7 @@ If the file is missing or has no `invoiceDay`, ask for these before doing anythi
 2. **Work-log doc:** do they already have a work-log Claude Doc (ask for the link), or should one be created on the first summary?
 3. **Calendar:** their work email. If the Google Calendar connector is connected, save `connector`. If it isn't, ask whether they can connect it (`/mcp`); otherwise they can export the calendar each time (saved as `~/Downloads`) or give a secret iCal address (see "Meetings" below).
 4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it. Optionally, the local folders that hold their clones, to catch work not yet pushed.
-5. **Name and role** for the heading. The git `user.name` and the logged-in email are reasonable defaults to offer.
+5. **Name** for the heading, and optionally their role. The git `user.name` and the logged-in email are reasonable defaults to offer.
 
 Write the file with whatever tool fits, then show the user what was saved.
 
@@ -195,7 +195,7 @@ Use this layout every time, so tabs are consistent across months and HR knows wh
 # <name> - Deliverables Summary - <period label>
 <as-of date chip> · <the user, as a mention chip>
 
-<Lead: 2–3 sentences, starting with name and role, then the period's main focus and its most significant outcomes.>
+<Lead: 2–3 sentences on the period's main focus and its most significant outcomes. Don't open with the person's name or role: the heading already names them.>
 
 ## Deliverables
 ### <Workstream name>
