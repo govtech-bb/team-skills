@@ -138,10 +138,10 @@ The raw material is commits, events and messages. The output is **deliverables**
 
 For each deliverable, write one plain sentence about what changed for users, the team or the organisation. Leave out implementation detail, ticket numbers and jargon. Spell out acronyms once.
 
-**Write for impact, not activity.** Each bullet should show who benefits and what is now possible, faster, safer or no longer at risk, before or alongside what was done. "Staff using screen readers can now sort cases" says more to HR than "Added aria-sort to table headers". Use real numbers from the sources where they exist (pages cut from 16 to 7, 560 security findings cleared, 6 pages published), and never invent or estimate one. Where the impact isn't known, say what the work makes possible rather than claiming a result.
+**Lead with the action, then show the impact.** Start each bullet with what the person did, as a past-tense verb (Ran, Built, Fixed, Reviewed, Published), so the record stays a list of their work. Then say who benefits and what is now possible, faster, safer or no longer at risk: "Fixed X, so Y" or "Ran X, which showed Y". "Fixed the case list's sortable columns for screen readers, so staff who use them can sort cases" beats both "Added aria-sort to table headers" (no impact) and "Staff can now sort cases" (no action). Use real numbers from the sources where they exist (pages cut from 16 to 7, 560 security findings cleared, 6 pages published), and never invent or estimate one. Where the impact isn't known, say what the work makes possible rather than claiming a result.
 
 > Commit trail: `fix(a11y): sortable header aria-sort`, `test: e2e sort`, `docs: sortable header`
-> Deliverable: Staff who use screen readers can now sort the case list, because its sortable columns are announced properly. ([#299](https://github.com/govtech-bb/case-management/pull/299))
+> Deliverable: Fixed the case list's sortable columns so screen readers announce them, so staff who use screen readers can sort cases. ([#299](https://github.com/govtech-bb/case-management/pull/299))
 
 **Link each bullet to the pull requests behind it.** End the sentence with the PR numbers as links in brackets: `([#299](url))`, or `([#16](url), [#24](url))` when several PRs make one deliverable. The reader then gets the claim and its proof in one place, and a bare number stays out of the way of the sentence. Do the same for reviews (the teammate's PR) and for in-progress work with an open PR. A deliverable from a meeting or from what the user told you has no link, and needs none.
 
