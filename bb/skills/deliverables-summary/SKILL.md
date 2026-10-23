@@ -177,7 +177,7 @@ The work log is a **Claude Doc**: one running doc with a tab per period, and eac
 | Tab | Order key | Holds |
 |---|---|---|
 | Overview | `a0` | One line on what the log is, then a table with one row per period, newest first: period (a link chip to its tab), main focus in one line, and meeting hours. |
-| One per period, named exactly like its heading, e.g. `First Last - Deliverables Summary - 23 Sep – 22 Oct 2026` | `b` + (99999999 − the start date as YYYYMMDD), e.g. `b79739076` for 2026-09-23 | That period's summary, laid out as below. |
+| One per period, named exactly like its heading, e.g. `23 Sep – 22 Oct 2026 - First Last - Deliverables Summary` (period first, so tabs are easy to tell apart in the sidebar) | `b` + (99999999 − the start date as YYYYMMDD), e.g. `b79739076` for 2026-09-23 | That period's summary, laid out as below. |
 
 The tab name is what an exported PDF or Word file takes as its title and file name, so it must match the tab's heading word for word. The order key sorts newer periods first without renumbering older tabs. Every tab needs an explicit order, because unordered tabs land in no useful position.
 
@@ -194,7 +194,7 @@ Fill the period tab one section at a time with pending blocks, as the docs conne
 Use this layout every time, so tabs are consistent across months and HR knows where to look:
 
 ```
-# <name> - Deliverables Summary - <period label>
+# <period label> - <name> - Deliverables Summary
 <as-of date chip> · <the user, as a mention chip>
 
 <Lead: 2–3 sentences on the period's main focus and what it achieved: the outcomes that matter most to users, the team or GovTech. Don't open with the person's name or role: the heading already names them.>
@@ -221,7 +221,7 @@ Leave out any section with nothing in it, except Deliverables. There is no separ
 
 ### Exporting for an invoice
 
-When the user asks to export a period, use the docs connector's export on **that period's tab only**, as PDF or Word (docx), whichever they say. Save the file where they ask, defaulting to `~/Downloads/<name> - Deliverables Summary - <period label>.<ext>`. The PR links stay in the export, because they're the evidence behind each claim.
+When the user asks to export a period, use the docs connector's export on **that period's tab only**, as PDF or Word (docx), whichever they say. Save the file where they ask, defaulting to `~/Downloads/<period label> - <name> - Deliverables Summary.<ext>`. The PR links stay in the export, because they're the evidence behind each claim.
 
 ## Back-filling several periods
 
