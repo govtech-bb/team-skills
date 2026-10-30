@@ -16,6 +16,7 @@ The skill does not read Slack or other chat tools, even if a connector is availa
 - **Python 3**, for the bundled scripts (standard library only), and **`gh`** signed in with access to the user's GitHub organisation.
 - **The Claude Docs connector**, for the work log. If its tools aren't available, say so and offer to write the period's summary as a Markdown file instead.
 - **The Google Calendar connector**, for meetings, connected through `/mcp` with calendar access granted. Without it, the summary has no meetings, so help the user connect it first.
+- **The Google Drive connector**, only if the user opts in to meeting notes (`useMeetingNotes`).
 
 ## Configuration
 
@@ -39,9 +40,10 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 - `calendarEmail` is the address the user's invites go to. It's how the skill finds their RSVP, so declined meetings are dropped.
 - `name` goes in each tab's heading. `role` is optional and only used if the user asks for it somewhere.
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
-  - `countUnansweredInvites` (ask): if true, count unanswered invites as attended instead of asking. Many people never reply to recurring team meetings.
+  - `countUnansweredInvites` (`"except large"`): how to treat invites the user never answered. `"except large"` counts them as attended but checks big one-off sessions; `true` counts every one; `false` asks about every one. Most people never reply to recurring team meetings, which is why counting is the default. The "possibly away" check under Meetings applies whatever this says.
   - `noteLeave` (false): if false, never mention leave or time off, including as the reason for a handover. Leave is personal, so it only goes in when the user says so.
-  - `quietStretches` (ask): how to describe weeks with no code activity, e.g. "design work in Figma and workshops". Put it as one line under Meetings and collaboration, with the dates.
+  - `quietStretches` (ask): how to describe stretches with no code activity that the user confirms they were working, e.g. "design work in Figma and workshops". There's no default: until the user has said, ask what they worked on rather than assuming. Put it as one line under Meetings and collaboration, with the dates.
+  - `useMeetingNotes` (false): if true, read the AI meeting notes attached to meetings the user attended, only to find their own contributions (see Meetings below). Off unless the user turns it on.
   - `nameColleagues` (false): if false, say "a teammate" or "a designer" instead of names. Other people didn't choose to appear in this person's HR record.
 
 ### First run, or "change my invoice date"
@@ -113,14 +115,19 @@ Read each event like this:
 
 From this, build the meeting summary: meeting count and hours, recurring series with counts, one-off meetings, and all-day events.
 
-**Read only. Never open attachments.** The connector can also create, change, delete and respond to events. This skill never does any of that. Events often carry meeting recordings and AI meeting notes as attachments. Don't open them: they hold what people said in the meeting, for the same reason the skill doesn't read Slack. The title, description and attendee list are enough to say what a meeting was for.
+**Read only. Leave attachments closed unless the user opts in.** The connector can also create, change, delete and respond to events. This skill never does any of that. Events often carry meeting recordings and AI meeting notes ("Notes by Gemini") as attachments. They hold what other people said, and agreeing to be recorded isn't agreeing to appear in someone's HR record, so by default don't open them: the title, description and attendee list are enough to say what a meeting was for.
+
+If `preferences.useMeetingNotes` is true, the user has chosen to let the notes help. Then, for meetings they attended only, read the AI notes (through the Google Drive connector) to find **their own** contributions: what they presented, decided, ran or took on. Never quote the notes, never attribute anything to anyone else, and never put note content in the doc: it only shapes the user's own bullets. Without the Drive connector, skip this and say so.
 
 **If the connector isn't available** (not connected, or an "Insufficient scope" error, which means calendar access wasn't granted when the user signed in): tell the user how to fix it ("run `/mcp`, choose claude.ai Google Calendar, reconnect, and tick the calendar permission"). Carry on with the other sources, and say plainly in the draft and the final reply that meetings are missing, so the summary isn't mistaken for complete.
 
 Then:
 
 - Drop anything that isn't work, and recompute the hours without it. That means placeholder blocks the user made for themselves ("Lunch", "Focus time", "Hold", "Commute": usually no other attendees, often recurring), personal bookings (tickets, travel, weekend plans), and team socials such as a team lunch out.
-- An invite the user never answered (`needsAction`) doesn't prove they went, especially a large one-off session. Unless `preferences.countUnansweredInvites` is true, list the bigger unanswered ones in step 4 and ask which they actually attended, rather than assuming. Either way, ask what they presented or ran: the calendar can't show that.
+- **Unanswered invites** (`needsAction`) count as attended, because most people never reply to recurring meetings (if `countUnansweredInvites` is `false`, ask about each instead), with two exceptions:
+  - **Possibly away.** First look for runs of two or more working days where every meeting is unanswered, the user accepted or organised nothing, and there's no GitHub activity (no commits, PRs or reviews). That pattern looks like time off that wasn't put in the calendar. Don't count those days' meetings or hours. In step 4 ask one neutral question per run, e.g. "There's no activity and no accepted meetings 3–7 Oct. Were you working those days?" If no, leave the days out (and, unless `noteLeave` is true, don't mention leave). If yes, count the meetings and ask what they worked on, since it wasn't code. Never describe such a stretch as any kind of work, from `quietStretches` or anywhere else, before the user has confirmed they were working. This check applies whatever `countUnansweredInvites` says.
+  - **Big one-off sessions.** A one-off meeting with 8 or more invitees (a workshop, all-hands, town hall) is one people often skip. Unless `countUnansweredInvites` is `true`, list these in step 4 for a quick yes or no.
+  Either way, ask what they presented or ran: the calendar can't show that.
 - Check the all-day events for leave, sick days, public holidays or training days. Don't put them in the summary, but mention any that look like time off in step 4 so the user can decide whether the invoice should note them.
 - Recurring series become one line each with a count ("Daily stand-ups ×21"). They show steady participation, but listing them one by one buries the meetings that matter.
 - Pick out the one-off meetings that carry outcomes: workshops, user research sessions, show-and-tells, stakeholder or MDA meetings, demos, onboarding or training given, and interviews. Use the title, description and attendee domains to work out the purpose. For example, a `*.gov.bb` domain other than the user's own points to a meeting with a ministry or department.
@@ -154,6 +161,7 @@ Show the user a short draft in the terminal: the workstreams and their deliverab
 - decisions you drove or unblocked in discussions
 - coordination with partners or MDAs
 - research, planning, training given, or work in other tools (design work in Figma, workshops, documents)
+- work you've committed but not pushed yet
 Is anything here that shouldn't be shared with HR?"
 
 If any merged PRs back no bullet, list them by plain-language title with their links, and ask for each: add it as a bullet (or fold it into an existing one), or leave it out.
@@ -161,7 +169,6 @@ If any merged PRs back no bullet, list them by plain-language title with their l
 Add what they mention, remove what they flag, and only then write to the doc. This step exists because the sources can't see everything, and the user is the only one who can fill the gaps.
 
 ## Step 5: Write the tab
-- work you've committed but not pushed yet
 
 The work log is a **Claude Doc**: one running doc with a tab per period, and each tab exports on its own to PDF or Word.
 
