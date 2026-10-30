@@ -34,6 +34,19 @@ def gh(*args):
     return result.stdout.strip()
 
 
+SEARCH_LIMIT = 1000  # the most GitHub search returns
+
+
+def search(kind, *args):
+    """Run a gh search. Hitting the limit must stop the script too: the results past it are
+    dropped without a word, and they can be work inside the period."""
+    out = gh("search", kind, *args, "--limit", str(SEARCH_LIMIT))
+    results = json.loads(out) if out else []
+    if len(results) >= SEARCH_LIMIT:
+        sys.exit(f"gh search {kind} hit its {SEARCH_LIMIT}-result limit, so some results are missing")
+    return results
+
+
 NOISE = re.compile(r"^(Merge (pull request|branch|remote-tracking|main|.+ into )|WIP on |index on |On \S+: )")
 
 
@@ -43,8 +56,7 @@ def owner_filters(orgs):
 
 def search_prs(orgs, *filters):
     fields = "number,title,state,url,repository,author"
-    out = gh("search", "prs", *filters, *owner_filters(orgs), "--limit", "200", "--json", fields)
-    prs = json.loads(out) if out else []
+    prs = search("prs", *filters, *owner_filters(orgs), "--json", fields)
     return [{"repo": p["repository"]["nameWithOwner"], "number": p["number"], "title": p["title"],
              "state": p["state"], "url": p["url"], "author": p["author"]["login"]} for p in prs]
 
@@ -61,8 +73,9 @@ def reviewed_prs(orgs, me, start, end):
                   if p["author"] != me]  # gh search ignores a negated author qualifier
     reviewed = []
     for pr in candidates:
+        # A pending review has no submitted_at yet.
         submitted = gh("api", "--paginate", f"repos/{pr['repo']}/pulls/{pr['number']}/reviews",
-                       "--jq", f'.[] | select(.user.login == "{me}") | .submitted_at').split()
+                       "--jq", f'.[] | select(.user.login == "{me}" and .submitted_at) | .submitted_at').split()
         if any(start <= datetime.fromisoformat(t.replace("Z", "+00:00")) < end for t in submitted):
             reviewed.append(pr)
     return reviewed
@@ -70,10 +83,10 @@ def reviewed_prs(orgs, me, start, end):
 
 def github_commits(orgs, me, window):
     """The user's commits on the organisations' default branches, grouped by repo."""
-    out = gh("search", "commits", "--author", me, "--committer-date", window, *owner_filters(orgs),
-             "--limit", "1000", "--json", "sha,commit,repository")
+    commits_found = search("commits", "--author", me, "--committer-date", window, *owner_filters(orgs),
+                           "--json", "sha,commit,repository")
     repos = {}
-    for item in json.loads(out) if out else []:
+    for item in commits_found:
         repo = item["repository"]["fullName"]
         subject = item["commit"]["message"].split("\n")[0]
         if NOISE.match(subject):
