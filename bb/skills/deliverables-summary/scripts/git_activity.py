@@ -4,8 +4,9 @@
 GitHub is the source of truth. Across every repo in the --org organisations,
 `gh search prs` finds PRs the gh user authored (merged, or open at the end of
 the period, which for a past period includes PRs merged after it ended) and PRs
-they reviewed, and `gh search commits` finds their commits on each repo's
-default branch. The window runs from local midnight to local midnight, because
+they reviewed, `gh search commits` finds their commits on each repo's default
+branch, and a GraphQL search finds issues assigned to them and closed as
+completed. The window runs from local midnight to local midnight, because
 GitHub's plain dates are UTC days and would move evening work into the next
 period. A review counts in the period it was submitted in, not when its PR
 last changed. Limiting to the work organisations keeps personal and
@@ -110,6 +111,34 @@ def github_commits(orgs, me, window):
             for repo, commits in sorted(repos.items())]
 
 
+CLOSED_ISSUES_QUERY = """
+query($q: String!, $endCursor: String) {
+  search(type: ISSUE, query: $q, first: 100, after: $endCursor) {
+    pageInfo { hasNextPage endCursor }
+    nodes { ... on Issue { number title url closedAt repository { nameWithOwner }
+      closedByPullRequestsReferences(first: 25, includeClosedPrs: true) { nodes { merged author { login } } } } }
+  }
+}"""
+
+
+def issues_closed(orgs, me, window):
+    """Issues assigned to the user and closed as completed, less the ones one of their own merged
+    PRs closed: that work is already in prs_merged. GraphQL, because gh search can't return the
+    closing PRs. The assignee is whoever is assigned now, not when the issue was closed."""
+    query = " ".join(["is:issue", "reason:completed", "assignee:@me", f"closed:{window}",
+                      *(f"org:{org}" for org in orgs)])
+    out = gh("api", "graphql", "--paginate", "-f", f"query={CLOSED_ISSUES_QUERY}", "-f", f"q={query}",
+             "--jq", ".data.search.nodes[]")
+    issues = [json.loads(line) for line in out.splitlines()]
+    if len(issues) >= SEARCH_LIMIT:
+        sys.exit(f"the closed-issues search hit its {SEARCH_LIMIT}-result limit, so some results are missing")
+    return [{"repo": i["repository"]["nameWithOwner"], "number": i["number"], "title": i["title"],
+             "url": i["url"], "closed": local_day(i["closedAt"])}
+            for i in issues
+            if not any(pr["merged"] and pr["author"] and pr["author"]["login"] == me
+                       for pr in i["closedByPullRequestsReferences"]["nodes"])]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--since", required=True)
@@ -137,6 +166,7 @@ def main():
         "prs_open_at_period_end": open_at_end,
         "prs_reviewed_for_others": reviewed,
         "github_commits": github_commits(orgs, me, window),
+        "issues_closed": issues_closed(orgs, me, window),
     }, indent=1))
 
 
