@@ -52,13 +52,23 @@ If the file is missing or has no `invoiceDay`, set up before doing anything else
 
 **First, check what the skill needs**, so nothing fails halfway through the first summary: `gh auth status` (signed in, with access to their organisation), that the Claude Docs tools are available, and that the Google Calendar connector can read events (a one-day `list_events` call is enough). Tell the user what's missing and how to fix it, in one short list. They can carry on without a source, but say what the summary will lack.
 
-Then ask these, together in one message rather than one at a time:
+**Then fill in what's already known**, so most people only have to confirm:
+- **Name:** `gh api user --jq .name`, or git `user.name` if that's empty.
+- **Work email:** the email of the Claude account they're signed in with. GitHub emails are often private, so don't rely on `gh` for this.
+- **GitHub organisation:** `gh api user/orgs --jq '.[].login'`. If there's more than one, pick the organisation holding most of their pull requests from the last 90 days (`gh search prs --author @me --created ">=<90 days ago>" --json repository --limit 200`, counted by owner), and name the others as not included. Personal and side-project organisations should stay out of an HR record.
 
-1. **Invoice day:** "What day of the month does your invoice period start? (e.g. 23)". Accept "the 23rd" or "23". Reject anything outside 1–31.
-2. **Work-log doc:** do they already have a work-log Claude Doc (ask for the link), or should one be created on the first summary?
-3. **Calendar email:** offer the email of the account they're signed in with as the default, and ask only if it isn't their work address. If the calendar check failed, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
-4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it.
-5. **Name** for the heading, and optionally their role. The git `user.name` and the logged-in email are reasonable defaults to offer.
+Then send one message: what you found, followed by the two things only they can answer.
+
+> Here's what I found. I'll use these unless you change anything:
+> - Name: **First Last** (from GitHub)
+> - Work email: **first.last@govtech.bb** (your Claude account)
+> - GitHub organisation: **govtech-bb**, where most of your recent pull requests are. Not included: other-org
+>
+> I just need: what day of the month does your invoice period start (e.g. 23)? And do you have a work-log doc already (paste the link), or shall I create one with your first summary?
+
+- **Invoice day:** accept "the 23rd" or "23". Reject anything outside 1–31.
+- **Anything you couldn't find,** ask for directly in the same message: a name if GitHub has none, the organisation if they're in none or have no recent pull requests (someone who doesn't write code, like a designer, can skip it). Role is optional; only ask if they want it in the heading.
+- If the calendar check failed, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
 
 Write the file with whatever tool fits, then show the user what was saved.
 
