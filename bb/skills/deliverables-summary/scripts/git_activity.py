@@ -114,29 +114,43 @@ def github_commits(orgs, me, window):
 CLOSED_ISSUES_QUERY = """
 query($q: String!, $endCursor: String) {
   search(type: ISSUE, query: $q, first: 100, after: $endCursor) {
+    issueCount
     pageInfo { hasNextPage endCursor }
     nodes { ... on Issue { number title url closedAt repository { nameWithOwner }
-      closedByPullRequestsReferences(first: 25, includeClosedPrs: true) { nodes { merged author { login } } } } }
+      timelineItems(itemTypes: [CLOSED_EVENT, CROSS_REFERENCED_EVENT], last: 50) { nodes { __typename
+        ... on ClosedEvent { actor { login } closer { ... on PullRequest { url } ... on Commit { oid } } }
+        ... on CrossReferencedEvent { source { ... on PullRequest { url } } } } } } }
   }
 }"""
 
 
-def issues_closed(orgs, me, window):
-    """Issues assigned to the user and closed as completed, less the ones one of their own merged
-    PRs closed: that work is already in prs_merged. GraphQL, because gh search can't return the
-    closing PRs. The assignee is whoever is assigned now, not when the issue was closed."""
+def issues_closed(orgs, window, prs, commits):
+    """Issues assigned to the user and closed as completed, less the ones whose work is already in
+    prs or commits: closed by one of them, or referenced by one of those PRs ("Refs #12" closes
+    nothing). GraphQL, because gh search can't return an issue's timeline. The assignee is whoever
+    is assigned now, not when the issue was closed, so closed_by says who closed it."""
     query = " ".join(["is:issue", "reason:completed", "assignee:@me", f"closed:{window}",
                       *(f"org:{org}" for org in orgs)])
-    out = gh("api", "graphql", "--paginate", "-f", f"query={CLOSED_ISSUES_QUERY}", "-f", f"q={query}",
-             "--jq", ".data.search.nodes[]")
-    issues = [json.loads(line) for line in out.splitlines()]
-    if len(issues) >= SEARCH_LIMIT:
+    pages = json.loads(gh("api", "graphql", "--paginate", "--slurp", "-f", f"query={CLOSED_ISSUES_QUERY}",
+                          "-f", f"q={query}"))
+    issues = [i for page in pages for i in page["data"]["search"]["nodes"]]
+    if pages[0]["data"]["search"]["issueCount"] > len(issues):
         sys.exit(f"the closed-issues search hit its {SEARCH_LIMIT}-result limit, so some results are missing")
-    return [{"repo": i["repository"]["nameWithOwner"], "number": i["number"], "title": i["title"],
-             "url": i["url"], "closed": local_day(i["closedAt"])}
-            for i in issues
-            if not any(pr["merged"] and pr["author"] and pr["author"]["login"] == me
-                       for pr in i["closedByPullRequestsReferences"]["nodes"])]
+    covered = {p["url"] for p in prs} | {c["sha"] for repo in commits for c in repo["commits"]}
+    kept = []
+    for issue in issues:
+        events = issue["timelineItems"]["nodes"]
+        closes = [e for e in events if e["__typename"] == "ClosedEvent"]
+        closer = (closes[-1]["closer"] or {}) if closes else {}
+        linked = {closer.get("url"), closer.get("oid", "")[:9]}
+        linked |= {e["source"].get("url") for e in events if e["__typename"] == "CrossReferencedEvent"}
+        if linked & covered:
+            continue
+        actor = closes[-1]["actor"] if closes else None
+        kept.append({"repo": issue["repository"]["nameWithOwner"], "number": issue["number"],
+                     "title": issue["title"], "url": issue["url"], "closed": local_day(issue["closedAt"]),
+                     "closed_by": actor["login"] if actor else None})
+    return kept
 
 
 def main():
@@ -158,6 +172,7 @@ def main():
     open_at_end = list({p["url"]: p for p in still_open + merged_later}.values())
     me = gh("api", "user", "--jq", ".login")
     reviewed = reviewed_prs(orgs, me, start, end)
+    commits = github_commits(orgs, me, window)
 
     print(json.dumps({
         "window": {"since": args.since, "until_exclusive": args.until},
@@ -165,8 +180,8 @@ def main():
         "prs_merged": authored_merged,
         "prs_open_at_period_end": open_at_end,
         "prs_reviewed_for_others": reviewed,
-        "github_commits": github_commits(orgs, me, window),
-        "issues_closed": issues_closed(orgs, me, window),
+        "github_commits": commits,
+        "issues_closed": issues_closed(orgs, window, authored_merged + open_at_end + reviewed, commits),
     }, indent=1))
 
 
