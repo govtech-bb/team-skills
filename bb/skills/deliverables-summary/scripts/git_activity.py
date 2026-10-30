@@ -54,11 +54,21 @@ def owner_filters(orgs):
     return [flag for org in orgs for flag in ("--owner", org)]
 
 
+def local_day(timestamp):
+    """The user's local date of a GitHub timestamp, so per-day activity lines up with the calendar."""
+    return datetime.fromisoformat(timestamp.replace("Z", "+00:00")).astimezone().date().isoformat()
+
+
 def search_prs(orgs, *filters):
-    fields = "number,title,state,url,repository,author"
+    fields = "number,title,state,url,repository,author,createdAt,closedAt"
     prs = search("prs", *filters, *owner_filters(orgs), "--json", fields)
+    # closedAt is the merge time for a merged PR (search has no mergedAt field), and
+    # 0001-01-01 for an open one.
     return [{"repo": p["repository"]["nameWithOwner"], "number": p["number"], "title": p["title"],
-             "state": p["state"], "url": p["url"], "author": p["author"]["login"]} for p in prs]
+             "state": p["state"], "url": p["url"], "author": p["author"]["login"],
+             "opened": local_day(p["createdAt"]),
+             "closed": None if p["closedAt"].startswith("0001-") else local_day(p["closedAt"])}
+            for p in prs]
 
 
 def local_midnight(day):
@@ -76,8 +86,9 @@ def reviewed_prs(orgs, me, start, end):
         # A pending review has no submitted_at yet.
         submitted = gh("api", "--paginate", f"repos/{pr['repo']}/pulls/{pr['number']}/reviews",
                        "--jq", f'.[] | select(.user.login == "{me}" and .submitted_at) | .submitted_at').split()
-        if any(start <= datetime.fromisoformat(t.replace("Z", "+00:00")) < end for t in submitted):
-            reviewed.append(pr)
+        in_period = [t for t in submitted if start <= datetime.fromisoformat(t.replace("Z", "+00:00")) < end]
+        if in_period:
+            reviewed.append({**pr, "reviewed_on": sorted({local_day(t) for t in in_period})})
     return reviewed
 
 
@@ -92,7 +103,7 @@ def github_commits(orgs, me, window):
         if NOISE.match(subject):
             continue
         commits = repos.setdefault(repo, {})
-        commits.setdefault(item["sha"], {"sha": item["sha"][:9], "date": item["commit"]["committer"]["date"][:10],
+        commits.setdefault(item["sha"], {"sha": item["sha"][:9], "date": local_day(item["commit"]["committer"]["date"]),
                                          "subject": subject})
     return [{"repo": repo,
              "commits": sorted(commits.values(), key=lambda c: c["date"], reverse=True)}
