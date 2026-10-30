@@ -8,15 +8,15 @@ a short month clamp to its last day (day 31 in February -> 28 or 29).
 Prints JSON with two periods so the caller can choose and say which it used:
   latest_complete  the most recent period whose last day is today or earlier
   current          the period that contains today (still open)
-Times carry the machine's real local UTC offset; no timezone is hardcoded.
 
 Usage: period.py --day 23 [--today 2026-10-12] [--ending 2026-10-22]
-  --ending  pick the period whose last day is this date instead (for back-filling)
+  --ending  pick the period whose last day is this date instead (for back-filling);
+            a date that isn't a period's last day is rejected
 """
 import argparse
 import calendar
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 
 def anchor(year, month, day):
@@ -37,8 +37,6 @@ def period_starting(start, day):
 
 def describe(start, end_exclusive):
     last = end_exclusive - timedelta(days=1)
-    offset = datetime.now().astimezone().strftime("%z")
-    offset = offset[:3] + ":" + offset[3:]
     if start.year == last.year:
         label = f"{start.day} {start:%b} – {last.day} {last:%b %Y}"
     else:
@@ -48,8 +46,6 @@ def describe(start, end_exclusive):
         "start_date": start.isoformat(),
         "last_date": last.isoformat(),
         "end_exclusive_date": end_exclusive.isoformat(),
-        "since": f"{start.isoformat()}T00:00:00{offset}",
-        "until": f"{end_exclusive.isoformat()}T00:00:00{offset}",
     }
 
 
@@ -67,6 +63,14 @@ def main():
     if args.ending:
         last = date.fromisoformat(args.ending)
         end_exclusive = last + timedelta(days=1)
+        if end_exclusive != anchor(end_exclusive.year, end_exclusive.month, args.day):
+            before = anchor(last.year, last.month, args.day) - timedelta(days=1)
+            if before >= last:
+                year, month = shift(last.year, last.month, -1)
+                before = anchor(year, month, args.day) - timedelta(days=1)
+            after = anchor(*shift(before.year, before.month, 1), args.day) - timedelta(days=1)
+            parser.error(f"{last} isn't the last day of a period with invoice day {args.day}; "
+                         f"did you mean {before} or {after}?")
         year, month = shift(end_exclusive.year, end_exclusive.month, -1)
         start = anchor(year, month, args.day)
         print(json.dumps({"requested": describe(start, end_exclusive)}, indent=2))
