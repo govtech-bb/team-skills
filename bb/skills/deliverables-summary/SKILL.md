@@ -26,7 +26,6 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
   "invoiceDay": 23,
   "docUrl": "https://claude.ai/artifact/…",
   "githubOrgs": ["govtech-bb"],
-  "repoRoots": ["~/Documents/Projects"],
   "calendarEmail": "first.last@govtech.bb",
   "name": "First Last",
   "role": "Frontend Developer, GovTech Barbados",
@@ -37,7 +36,6 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 - `invoiceDay` (1–31) is the day a period starts. Day 23 means 23 Sep – 22 Oct. A day that a short month doesn't have becomes that month's last day.
 - `docUrl` is the running work-log doc, a Claude Doc. Leave it out until the first summary creates it.
 - `githubOrgs` is where the skill looks for the user's work: every repo in these GitHub organisations, whether or not it's cloned locally. It also keeps personal and side-project repos out of an HR document. Someone who doesn't work in code (a designer, a delivery manager) can leave it empty, and the code source is skipped.
-- `repoRoots` is optional. Local folders only add work that hasn't reached GitHub yet (unpushed commits).
 - `calendarEmail` is the address the user's invites go to. It's how the skill finds their RSVP, so declined meetings are dropped.
 - `name` goes in each tab's heading. `role` is optional and only used if the user asks for it somewhere.
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
@@ -57,7 +55,7 @@ Then ask these, together in one message rather than one at a time:
 1. **Invoice day:** "What day of the month does your invoice period start? (e.g. 23)". Accept "the 23rd" or "23". Reject anything outside 1–31.
 2. **Work-log doc:** do they already have a work-log Claude Doc (ask for the link), or should one be created on the first summary?
 3. **Calendar email:** offer the email of the account they're signed in with as the default, and ask only if it isn't their work address. If the calendar check failed, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
-4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it. Optionally, the local folders that hold their clones, to catch work not yet pushed.
+4. **GitHub organisation:** which organisation(s) their work lives in, e.g. `govtech-bb`. For anyone who writes code this is the main source, so ask for it; someone who doesn't can skip it.
 5. **Name** for the heading, and optionally their role. The git `user.name` and the logged-in email are reasonable defaults to offer.
 
 Write the file with whatever tool fits, then show the user what was saved.
@@ -88,10 +86,14 @@ Run the sources in parallel where you can. If a source isn't available, carry on
 Skip this when `githubOrgs` is empty.
 
 ```bash
-python3 <skill>/scripts/git_activity.py --since <start_date> --until <end_exclusive_date> --org <each githubOrg> [--root <each repoRoot>]
+python3 <skill>/scripts/git_activity.py --since <start_date> --until <end_exclusive_date> --org <each githubOrg>
 ```
 
-GitHub is the source of truth: the script searches every repo in the organisations, not just the ones cloned on this machine, because people move between repos and delete old clones. It returns merged PRs, PRs still open, PRs the user reviewed for teammates, and the user's commits on each repo's main branch. With `--root`, it also returns `unpushed_commits`: work committed locally that GitHub doesn't have yet. Treat that as in progress. Merges and stash noise are already dropped. A commit and the PR that squash-merged it are the same piece of work, so count it once. So is the same commit appearing in a second repo: organisations often hold mirrors, forks or proof-of-concept copies of a repo (e.g. `case-management-trunk-poc`), so match on the commit subject and PR number. Reviews of teammates' work are real deliverables, so keep them.
+GitHub is the source of truth: the script searches every repo in the organisations, not just the ones cloned on this machine, because people move between repos and delete old clones. It returns merged PRs, PRs that were open at the end of the period (including ones merged after it, so back-filled periods are right), PRs the user reviewed for teammates (dated by when the review was submitted), and the user's commits on each repo's main branch. Merges and stash noise are already dropped. A commit and the PR that squash-merged it are the same piece of work, so count it once. So is the same commit appearing in a second repo: organisations often hold mirrors, forks or proof-of-concept copies of a repo (e.g. `case-management-trunk-poc`), so match on the commit subject and PR number. Reviews of teammates' work are real deliverables, so keep them.
+
+An open PR is only reported if it had some activity since the period started. Even so, before listing a PR under "In progress", check it was actually being worked on: one opened long ago that only had a comment or a rebase may be paused, so ask the user rather than assume.
+
+If the script exits with an error, it prints what GitHub said (an expired sign-in, a rate limit, no network). Don't write the period without code: tell the user what failed, fix it or wait, and run it again. An empty result from a failed search would read as a month with no work.
 
 ### Meetings: Google Calendar
 
@@ -159,6 +161,7 @@ If any merged PRs back no bullet, list them by plain-language title with their l
 Add what they mention, remove what they flag, and only then write to the doc. This step exists because the sources can't see everything, and the user is the only one who can fill the gaps.
 
 ## Step 5: Write the tab
+- work you've committed but not pushed yet
 
 The work log is a **Claude Doc**: one running doc with a tab per period, and each tab exports on its own to PDF or Word.
 
@@ -220,7 +223,7 @@ When the user asks to export a period, use the docs connector's export on **that
 When the user wants a run of past periods, such as every month since they started:
 
 1. **Find where the history starts.** Look for the earliest work in each source: the earliest PR in `githubOrgs`, the earliest commit, and the earliest event in the calendar. Ask the user for their start date if the first period would only be partly covered. Tell them which months have no calendar data.
-2. **Gather and draft each period separately**, in parallel. Use one subagent per period if you can. Each one runs both scripts for its window, follows steps 2 and 3, and returns a draft in the period tab layout, plus its own questions: large unanswered invites, possible leave, and gaps such as weeks with no activity. Drafting period by period keeps work from one month leaking into another.
+2. **Gather and draft each period separately**, in parallel. Use one subagent per period if you can, but start no more than four at a time: GitHub allows 30 searches a minute, and each period makes five. If a period hits the rate limit, wait a minute and run it again. Each one runs the script and reads the calendar for its window, follows steps 2 and 3, and returns a draft in the period tab layout, plus its own questions: large unanswered invites, possible leave, and gaps such as weeks with no activity. Drafting period by period keeps work from one month leaking into another.
 3. **Run step 4 once for the whole run**, not once per period. Show a short outline of every period (main focus plus 3–5 headline deliverables), then the questions grouped by period. Asking seven separate times wears the user out.
 4. **Write one tab per period** with its own order key, plus one Overview row each. Thinly covered months still get a tab. Say what's thin in the lead ("Calendar records start in April, so meetings for this period aren't listed"), rather than padding.
 
