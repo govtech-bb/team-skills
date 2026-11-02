@@ -43,10 +43,20 @@ pre-existing code read as new — the error this skill exists to prevent.
 Then read what the PR claims and what it was asked to do:
 
 ```bash
-gh pr view $N --repo $R --json title,body,closingIssuesReferences \
-  --jq '.title, .body, (.closingIssuesReferences[].number)'
-gh issue view <n> --repo $R             # each linked issue
+. <T>/env
+gh pr view $N --repo $R                # the description
+gh pr view $N --repo $R --json title,body,headRefName,closingIssuesReferences \
+  --jq '(.closingIssuesReferences[].url), .title, .body, (.headRefName | capture("^(?<n>[0-9]+)[-_/]").n // empty | "#"+.)' \
+  | grep -oE 'https://github\.com/[^/[:space:]]+/[^/[:space:]]+/issues/[0-9]+|([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+' | sort -u
+gh issue view <n> --repo <owner/repo>   # each linked issue
 ```
+
+`closingIssuesReferences` is empty for a PR on a non-default base or one that says "Part of #N",
+so the second command also takes references from the title, body and branch name
+(`3125-api-v2-lists`). A bare `#N` is in `$R`. Some hits are PRs or passing mentions: the issues
+the PR closes, is part of, or is named after are the linked ones; the rest are context. If a linked
+issue can't be read (private, another org, deleted), or the PR names none, say so in the review
+body rather than skipping it.
 
 The description's claims are things to verify, not facts. A linked issue's acceptance criteria
 are review criteria: one the PR leaves unmet is a defect, unless the description says it is
@@ -61,14 +71,15 @@ grep -rn "<symbol>" src/                     # wrong — whatever is checked out
 
 ## 2. Get findings
 
-If findings were handed to you (from `/code-review` or another pass), they are your input — go to
-*Sort findings*. Otherwise, dispatch one `bb:dev-reviewer` for the PR: its tool output stays out of
-your context and it returns a draft with a verification log. Reviewing the diff yourself is fine for
-a small PR.
+Always dispatch one `bb:dev-reviewer` for the PR, however small: it traces the PR's promises, breaks
+the main behaviour to check a test fails, and runs what reading can't settle, in a scratch
+worktree. Its tool output stays out of your context and it returns a draft with a verification log.
+Findings handed to you (from `/code-review` or another pass) go to it as *Handed-down findings to
+verify*, not straight to *Sort findings*.
 
 **Several PRs at once:** fetch every head in one command, then dispatch one `bb:dev-reviewer` per
-PR, all in the same message. Parallel `git fetch` into one repo races on ref locks, and the agents
-only read via `git show`/`git grep`, so the SHAs are all they need.
+PR, all in the same message. Parallel `git fetch` into one repo races on ref locks; once the heads
+are fetched, each agent only needs its SHAs and adds its own worktree.
 
 ```bash
 git fetch origin "$B" pull/193/head pull/382/head pull/421/head
@@ -82,10 +93,13 @@ Review PR #<N> in <R>. Return your draft; do not post anything.
 - HEAD_SHA: <sha>
 - BASE_SHA: <sha>
 - Linked issues: <#n, … | none>
-- Guidance from the user: <their focus, or none>
+- Guidance from the user (claims to check, not facts): <their focus, or none>
 - Handed-down findings to verify: <list with path:line, or none>
 - Your earlier review's open threads: <path:line — gist, or none>
 ```
+
+Pass the user's guidance in their words. Don't add your own "already decided" list or ask the agent
+to confirm a fix is present: ask whether the promise it was for now holds.
 
 **Check the draft before you use it.** Re-run the evidence command for every `Fabricated` and
 `Pre-existing` line in the agent's verification log, and for one `Real` line. These are the verdicts
