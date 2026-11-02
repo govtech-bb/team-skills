@@ -117,20 +117,30 @@ query($q: String!, $endCursor: String) {
     pageInfo { hasNextPage endCursor }
     nodes { ... on Issue { number title url closedAt repository { nameWithOwner }
       closes: timelineItems(itemTypes: [CLOSED_EVENT], last: 1) { nodes { ... on ClosedEvent {
-        actor { login } closer { ... on PullRequest { url author { login } } ... on Commit { oid } } } } }
+        actor { login } closer { ... on PullRequest { url author { login } } ... on Commit { ...commit } } } } }
       refs: timelineItems(itemTypes: [CROSS_REFERENCED_EVENT, REFERENCED_EVENT], first: 100) { nodes {
-        ... on CrossReferencedEvent { source { ... on PullRequest { url } } }
-        ... on ReferencedEvent { commit { oid } } } } } }
+        ... on CrossReferencedEvent { source { ... on PullRequest { url merged author { login } } } }
+        ... on ReferencedEvent { commit { ...commit } } } } } }
   }
-}"""
+}
+fragment commit on Commit { oid url author { user { login } } }"""
 
 
-def issues_closed(orgs, window, prs, commits):
+def author_login(link):
+    """A PR's or commit's author login. A commit's author is a git identity, linked to a login only
+    when GitHub can match it."""
+    author = link.get("author") or {}
+    return (author.get("user") or {}).get("login") if "oid" in link else author.get("login")
+
+
+def issues_closed(orgs, me, window, prs, commits):
     """Issues assigned to the user and closed as completed, less the ones whose work is already in
     the user's own prs or commits: closed by one of them, or referenced by one ("Refs #12" closes
     nothing). GraphQL, because gh search can't return an issue's timeline. The assignee is whoever
     is assigned now, not when the issue was closed, so closed_by says who closed it: the closing
-    PR's author, since whoever merges a PR is often not who did the work."""
+    PR's author, since whoever merges a PR is often not who did the work. earlier_work lists the
+    user's own merged PRs and commits linked to a kept issue, which, being outside prs and
+    commits, in practice means work from an earlier period."""
     query = " ".join(["is:issue", "reason:completed", "assignee:@me", f"closed:{window}",
                       *(f"org:{org}" for org in orgs)])
     pages = json.loads(gh("api", "graphql", "--paginate", "--slurp", "-f", f"query={CLOSED_ISSUES_QUERY}",
@@ -143,15 +153,15 @@ def issues_closed(orgs, window, prs, commits):
     for issue in issues:
         close = next(iter(issue["closes"]["nodes"]), {})
         closer = close.get("closer") or {}
-        linked = [closer.get("url"), closer.get("oid", "")[:9]]
-        for ref in issue["refs"]["nodes"]:
-            linked += [(ref.get("source") or {}).get("url"), (ref.get("commit") or {}).get("oid", "")[:9]]
-        if covered.intersection(linked):
+        links = [closer] + [ref.get("source") or ref.get("commit") or {} for ref in issue["refs"]["nodes"]]
+        # prs are keyed by url and commits by short sha; a cross-reference from an issue is an empty link.
+        if covered.intersection(link["oid"][:9] if "oid" in link else link.get("url") for link in links):
             continue
-        closed_by = closer.get("author") or close.get("actor")
+        closed_by = (closer.get("author") if "oid" not in closer else None) or close.get("actor")
+        mine = {link["url"] for link in links if link.get("merged", True) and author_login(link) == me}
         kept.append({"repo": issue["repository"]["nameWithOwner"], "number": issue["number"],
                      "title": issue["title"], "url": issue["url"], "closed": local_day(issue["closedAt"]),
-                     "closed_by": closed_by["login"] if closed_by else None})
+                     "closed_by": closed_by["login"] if closed_by else None, "earlier_work": sorted(mine)})
     return kept
 
 
@@ -183,7 +193,7 @@ def main():
         "prs_open_at_period_end": open_at_end,
         "prs_reviewed_for_others": reviewed,
         "github_commits": commits,
-        "issues_closed": issues_closed(orgs, window, authored_merged + open_at_end, commits),
+        "issues_closed": issues_closed(orgs, me, window, authored_merged + open_at_end, commits),
     }, indent=1))
 
 
