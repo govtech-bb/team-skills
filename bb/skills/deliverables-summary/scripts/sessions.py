@@ -9,9 +9,10 @@ the folder rather than the git remote keeps working after a worktree is deleted,
 and keeps personal and side-project sessions out of an HR document.
 
 Only metadata comes out: titles, folders, branches, linked PRs, the local days the
-user sent a prompt and a prompt count. Transcripts can hold secrets and personal
-data, so no prompt or reply text is printed. Titles are generated from the prompts,
-though, so they can still name people or things from the work.
+user sent a prompt and a prompt count. A prompt copied into a resumed or forked
+session is counted once, in the oldest transcript. Transcripts can hold secrets and
+personal data, so no prompt or reply text is printed. Titles are generated from the
+prompts, though, so they can still name people or things from the work.
 
 Prints one JSON object. Claude Code deletes a transcript once it has had no activity
 for cleanupPeriodDays (30 by default), so history_starts is the oldest surviving
@@ -94,7 +95,8 @@ def main():
     history_starts = datetime.fromtimestamp(min(last_activity.values())).astimezone()
 
     sessions = {}
-    for transcript in last_activity:
+    seen = set()  # a resumed/forked session re-writes earlier prompts under a new sessionId
+    for transcript in sorted(last_activity, key=last_activity.get):  # originals before their copies
         if last_activity[transcript] < start.timestamp():
             continue
         try:
@@ -135,6 +137,11 @@ def main():
                     session["branches"].add(record["gitBranch"])
                 # Only typed prompts mark a day: a session left open keeps writing records.
                 if is_prompt(record):
+                    uid = record.get("uuid")
+                    if uid in seen:
+                        continue
+                    if uid:
+                        seen.add(uid)
                     session["days"].add(when.date().isoformat())
                     session["prompts"] += 1
 
