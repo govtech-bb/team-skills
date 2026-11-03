@@ -8,12 +8,17 @@ the folder rather than the git remote keeps working after a worktree is deleted,
 and keeps personal and side-project sessions out of an HR document.
 
 Only metadata comes out: titles, folders, branches, linked PRs, the local days the
-session was active and a prompt count. Transcripts can hold secrets and personal data, so no prompt or reply
-text is ever printed.
+user sent a prompt and a prompt count. Transcripts can hold secrets and personal
+data, so no prompt or reply text is printed. Titles are generated from the prompts,
+though, so they can still name people or things from the work.
 
-Prints one JSON object. history_starts is the earliest record in any transcript:
-Claude Code deletes old transcripts (cleanupPeriodDays, 30 by default), so a period
+Prints one JSON object. Claude Code deletes a transcript once it has had no activity
+for cleanupPeriodDays (30 by default), so history_starts is the oldest surviving
+transcript's last activity: sessions that ended before it are gone, and a period
 that starts before it is only partly covered.
+
+Exits with an error when there are no transcripts at all, because an empty result
+would read as a period with no sessions in it.
 
 Usage: sessions.py --since 2026-09-23 --until 2026-10-23 --folder ~/Documents/Projects [--folder ...]
   --since / --until are dates; --until is exclusive.
@@ -41,13 +46,21 @@ def under(path, folders):
     return any(key == folder or key.startswith(folder + os.sep) for folder in folders)
 
 
+# Claude Code writes these as ordinary user messages, but nobody typed them.
+INJECTED = ("<task-notification", "[Request interrupted")
+
+
 def is_prompt(record):
-    """A message the user typed, as opposed to a tool result sent back on their behalf."""
-    if record.get("type") != "user" or record.get("isSidechain"):
+    """A message the user typed, as opposed to a tool result, skill text or notification."""
+    if record.get("type") != "user" or record.get("isSidechain") or record.get("isMeta") \
+            or record.get("isCompactSummary"):
         return False
     content = record.get("message", {}).get("content")
-    return isinstance(content, str) or (
-        isinstance(content, list) and not any(part.get("type") == "tool_result" for part in content))
+    if isinstance(content, list):
+        if any(part.get("type") == "tool_result" for part in content):
+            return False
+        content = next((part.get("text", "") for part in content if part.get("type") == "text"), "")
+    return isinstance(content, str) and not content.lstrip().startswith(INJECTED)
 
 
 def main():
@@ -63,10 +76,15 @@ def main():
     folders = [path_key(folder) for folder in args.folder]
     # Subagent transcripts sit one level deeper and belong to their parent session.
     transcripts = glob.glob(os.path.join(os.path.expanduser(args.projects_dir), "*", "*.jsonl"))
+    if not transcripts:
+        sys.exit(f"no Claude Code transcripts in {args.projects_dir}")
+    last_activity = {transcript: os.path.getmtime(transcript) for transcript in transcripts}
+    history_starts = datetime.fromtimestamp(min(last_activity.values())).astimezone()
 
     sessions = {}
-    history_starts = None
     for transcript in transcripts:
+        if last_activity[transcript] < start.timestamp():
+            continue
         with open(transcript, errors="replace") as lines:
             for line in lines:
                 try:
@@ -90,15 +108,16 @@ def main():
                 if not record.get("timestamp"):
                     continue
                 when = parse_time(record["timestamp"])
-                history_starts = min(history_starts or when, when)
                 cwd = record.get("cwd")
                 if not (start <= when < end) or not cwd or not under(cwd, folders):
                     continue
-                session["days"].add(when.date().isoformat())
                 session["folders"].add(cwd)
                 if record.get("gitBranch") and record["gitBranch"] != "HEAD":
                     session["branches"].add(record["gitBranch"])
-                session["prompts"] += is_prompt(record)
+                # Only typed prompts mark a day: a session left open keeps writing records.
+                if is_prompt(record):
+                    session["days"].add(when.date().isoformat())
+                    session["prompts"] += 1
 
     active = [{"session_id": session_id,
                "title": s["custom_title"] or s["ai_title"],
@@ -112,7 +131,7 @@ def main():
 
     print(json.dumps({
         "window": {"since": args.since, "until_exclusive": args.until},
-        "history_starts": history_starts.date().isoformat() if history_starts else None,
+        "history_starts": history_starts.date().isoformat(),
         "sessions": active,
     }, indent=1))
 
