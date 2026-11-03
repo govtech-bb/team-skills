@@ -50,7 +50,7 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 
 ### First run, or "change my invoice date"
 
-If the file is missing or has no `invoiceDay`, set up before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop. If the file has no `sessionFolders` key at all (it was set up before sessions were a source), suggest work folders and offer the session history setting, as below, before step 1.
+If the file is missing or has no `invoiceDay`, set up before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop. If the file has no `sessionFolders` key at all (it was set up before sessions were a source), suggest work folders and offer the session history setting, as below, before step 1. If they don't want sessions read, save `sessionFolders` as `[]` so they aren't asked again.
 
 **First, check what the skill needs**, so nothing fails halfway through the first summary: `gh auth status` (signed in, with access to their organisation), that the Claude Docs tools are available, that the Google Calendar connector can read events (a one-day `list_events` call is enough), and that the Google Drive connector can list files (`list_recent_files` with `pageSize` 1). Tell the user what's missing and how to fix it, in one short list. They can carry on without a source, but say what the summary will lack.
 
@@ -161,15 +161,15 @@ It lists the sessions the user sent prompts in during the period inside a work f
 
 Sessions are suggestions, not deliverables. Much of what they show is already covered by another source. The rest is often research, reviews, spikes, drafting or investigating that never became a commit, which is why they're worth reading. Time in a session isn't time worked, so never use sessions to estimate hours.
 
-If `history_starts` is after the period's first day, the earlier sessions have been deleted. Mention it in step 4, and if session suggestions made it into the tab, say so in the lead ("Claude Code session history starts on 30 Sep, so earlier work in this period may be missing").
+If `history_starts` is after the period's first day, sessions that ended before it have been deleted (longer ones that began earlier survive, so some earlier days can still appear). Mention it in step 4, and if session suggestions made it into the tab, say so in the lead ("Claude Code sessions that ended before 5 Oct have been deleted, so some earlier work in this period may be missing").
 
 ### Documents: Google Drive
 
 Only for the latest complete period or the current one. Drive doesn't say when the user last edited a file, so an older period can't be told apart from everything since it. When back-filling, use it for the latest period only, and say why the others have no document suggestions.
 
-Use the Google Drive connector's `list_recent_files` with `orderBy` = `lastModifiedByMe`, `excludeContentSnippets` = true and `pageSize` = 50, following `nextPageToken`. Files come back newest edit first, followed by files the user never edited. A file has to be opened before it's edited, so stop at the first file whose `viewedByMeTime` is missing or before the period starts: every file after it was last edited before the period, or never. Of the files before that point, drop those created after the period's last day: they can't hold work from it.
+Use the Google Drive connector's `list_recent_files` with `orderBy` = `lastModifiedByMe`, `excludeContentSnippets` = true and `pageSize` = 50, following `nextPageToken`. Files come back newest edit first, followed by files the user never edited. First drop folders, meeting notes and recordings, such as "Notes by Gemini" (those follow the meeting-notes rule above): Drive can count them as the user's edits even when they never opened them. Then, since a file has to be opened before it's edited, stop at the first remaining file whose `viewedByMeTime` is missing or before the period starts: every file after it was last edited before the period, or never. Of the files before that point, drop those created after the period's last day: they can't hold work from it.
 
-**Read only, titles and metadata only.** Don't open the documents, and never create, change or share anything. Drop folders, meeting notes and recordings, such as "Notes by Gemini" (those follow the meeting-notes rule above), and anything that isn't work. A file the user only opened after the period may not have been edited in it, so like sessions, documents are suggestions for step 4.
+**Read only, titles and metadata only.** Don't open the documents, and never create, change or share anything. Drop anything that isn't work. A file the user only opened after the period may not have been edited in it, so like sessions, documents are suggestions for step 4.
 
 If the connector isn't available, carry on and say that documents are missing.
 
@@ -190,7 +190,7 @@ Work committed straight to the main branch has no pull request to link. When mos
 
 **Account for every merged PR.** Each one backs a bullet, or is deliberately left out. Small fixes can share a bullet with related work, but a PR that matches no bullet is a gap in the summary or a sign it isn't worth listing, and only the user knows which. Collect these orphans for step 4 rather than dropping them silently.
 
-**Match sessions and documents to what's already found.** A session that linked one of the returned PRs, or whose title, folder or branch names a returned PR or issue number (worktrees are often named after one, like `case-management-429`), is the same work: drop it. So is a document a deliverable or meeting already covers, such as the design doc behind a PR or the agenda for a workshop. What's left is work no other source shows. Turn each into a one-line suggestion in the right workstream, merging sessions that are clearly the same piece of work, and keep them for step 4 instead of putting them in the draft.
+**Match sessions and documents to what's already found.** A session that linked one of the returned PRs (`prs`), or whose folder, branch or title names a returned PR or issue in the same repo (worktrees are often named after one, like `case-management-429` for issue 429 in `case-management`), is the same work: drop it. A bare number with no repo to match isn't enough. So is a document a deliverable or meeting already covers, such as the design doc behind a PR or the agenda for a workshop. What's left is work no other source shows. Turn each into a one-line suggestion in the right workstream, merging sessions that are clearly the same piece of work, and keep them for step 4 instead of putting them in the draft.
 
 Fold meetings into the workstream they belong to. A workshop about the case system goes under the case system, not in a separate meetings pile. Only meetings that serve no single workstream go in the collaboration section.
 

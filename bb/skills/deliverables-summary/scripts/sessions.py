@@ -36,8 +36,9 @@ def parse_time(timestamp):
 
 
 def path_key(path):
-    # macOS paths are case-insensitive, and the same folder turns up in both spellings.
-    path = os.path.normpath(os.path.expanduser(path))
+    # Transcripts record the physical folder, and macOS paths are case-insensitive, so the
+    # same folder turns up behind symlinks (/tmp is /private/tmp) and in both spellings.
+    path = os.path.realpath(os.path.expanduser(path))
     return path.casefold() if sys.platform == "darwin" else path
 
 
@@ -46,7 +47,8 @@ def under(path, folders):
     return any(key == folder or key.startswith(folder + os.sep) for folder in folders)
 
 
-# Claude Code writes these as ordinary user messages, but nobody typed them.
+# Transcripts from before Claude Code recorded a prompt's origin write these as ordinary
+# user messages, but nobody typed them.
 INJECTED = ("<task-notification", "[Request interrupted")
 
 
@@ -55,6 +57,8 @@ def is_prompt(record):
     if record.get("type") != "user" or record.get("isSidechain") or record.get("isMeta") \
             or record.get("isCompactSummary"):
         return False
+    if "origin" in record:
+        return (record["origin"] or {}).get("kind") == "human"
     content = record.get("message", {}).get("content")
     if isinstance(content, list):
         if any(part.get("type") == "tool_result" for part in content):
@@ -91,6 +95,8 @@ def main():
                     record = json.loads(line)
                 except ValueError:
                     continue
+                if not isinstance(record, dict):
+                    continue
                 session = sessions.setdefault(record.get("sessionId") or os.path.basename(transcript)[:-len(".jsonl")], {
                     "days": set(), "folders": set(), "branches": set(), "prompts": 0,
                     "ai_title": None, "custom_title": None, "prs": {}, "continued_in": None})
@@ -99,7 +105,7 @@ def main():
                     session["ai_title"] = record.get("aiTitle")
                 elif kind == "custom-title":
                     session["custom_title"] = record.get("customTitle")
-                elif kind == "pr-link":
+                elif kind == "pr-link" and record.get("prUrl"):
                     session["prs"][record["prUrl"]] = {"repo": record.get("prRepository"),
                                                        "number": record.get("prNumber"), "url": record["prUrl"]}
                 elif kind == "continued-in":
