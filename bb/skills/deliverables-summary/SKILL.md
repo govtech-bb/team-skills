@@ -66,7 +66,7 @@ Then send one message: what you found, followed by the two things only they can 
 > - Name: **First Last** (from GitHub)
 > - Work email: **first.last@govtech.bb** (your Claude account)
 > - GitHub organisation: **govtech-bb**, where most of your recent pull requests are. Not included: other-org
-> - Work folders for Claude Code sessions: **~/Documents/Projects** and **~/work**, where your govtech-bb clones are (remove any you don't want)
+> - Work folders for Claude Code sessions: **~/Documents/Projects** and **~/Code**, where your govtech-bb clones are (remove any you don't want)
 >
 > I just need: what day of the month does your invoice period start (e.g. 23)? And do you have a work-log doc already (paste the link), or shall I create one with your first summary?
 
