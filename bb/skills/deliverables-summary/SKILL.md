@@ -44,7 +44,7 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
   - `countUnansweredInvites` (`"except large"`): how to treat invites the user never answered. `"except large"` counts them as attended but checks big one-off sessions; `true` counts every one; `false` asks about every one. Most people never reply to recurring team meetings, which is why counting is the default. The "possibly away" check under Meetings applies whatever this says.
   - `noteLeave` (false): if false, never mention leave or time off, including as the reason for a handover. Leave is personal, so it only goes in when the user says so.
-  - `quietStretches` (ask): how to describe stretches with no code activity that the user confirms they were working, e.g. "design work in Figma and workshops". There's no default: until the user has said, ask what they worked on rather than assuming. Put it as one line under Meetings and collaboration, with the dates.
+  - `quietStretches` (ask): what the user works on in stretches with no code activity that they confirm they were working, e.g. "design work in Figma and workshops". There's no default: until the user has said, ask what they worked on rather than assuming. Put it as one line under Meetings and collaboration, with the dates, saying only what they did, never that there was no activity.
   - `useMeetingNotes` (false): if true, read the AI meeting notes attached to meetings the user attended, only to find their own contributions (see Meetings below). Off unless the user turns it on.
   - `nameColleagues` (false): if false, say "a teammate" or "a designer" instead of names. Other people didn't choose to appear in this person's HR record.
 
@@ -264,6 +264,8 @@ Use this layout every time, so tabs are consistent across months and HR knows wh
 ```
 
 Leave out any section with nothing in it, except Deliverables. There is no separate list of links at the end: each link sits on the bullet it backs, so a links-only section would only repeat the deliverables.
+
+Never mention gaps, quiet stretches or days without activity in the tab. Questions about them belong in step 4, and a confirmed stretch is described only by the work done.
 
 ### Exporting for an invoice
 
