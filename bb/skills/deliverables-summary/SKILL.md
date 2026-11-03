@@ -190,7 +190,7 @@ Work committed straight to the main branch has no pull request to link. When mos
 
 **Account for every merged PR.** Each one backs a bullet, or is deliberately left out. Small fixes can share a bullet with related work, but a PR that matches no bullet is a gap in the summary or a sign it isn't worth listing, and only the user knows which. Collect these orphans for step 4 rather than dropping them silently.
 
-**Match sessions and documents to what's already found.** A session that linked one of the returned PRs (`prs`), or whose folder, branch or title names a returned PR or issue in the same repo (worktrees are often named after one, like `case-management-429` for issue 429 in `case-management`), is the same work: drop it. A bare number with no repo to match isn't enough. So is a document a deliverable or meeting already covers, such as the design doc behind a PR or the agenda for a workshop. What's left is work no other source shows. Turn each into a one-line suggestion in the right workstream, merging sessions that are clearly the same piece of work, and keep them for step 4 instead of putting them in the draft.
+**Match sessions and documents to what's already found.** A session that linked one of the returned PRs (`prs`), or whose folder, branch or title names a returned PR or issue in the same repo (worktrees are often named after one, like `case-management-429` for issue 429 in `case-management`), is the same work: drop it. A bare number with no repo to match isn't enough. So is a document a deliverable or meeting already covers, such as the design doc behind a PR or the agenda for a workshop. Drop sessions with no title, and any whose title, folder and branch don't clearly show GovTech work. Don't ask about them. What's left is work no other source shows. Turn each into a one-line suggestion in the right workstream, merging sessions that are clearly the same piece of work, and keep them for step 4 instead of putting them in the draft.
 
 Fold meetings into the workstream they belong to. A workshop about the case system goes under the case system, not in a separate meetings pile. Only meetings that serve no single workstream go in the collaboration section.
 
@@ -208,7 +208,7 @@ Is anything here that shouldn't be shared with HR?"
 
 If any merged PRs back no bullet, list them by plain-language title with their links, and ask for each: add it as a bullet (or fold it into an existing one), or leave it out. Ask the same about closed issues someone else closed, and about ones with `earlier_work`, linking that earlier work so the user can see whether it was billed already.
 
-Then offer the suggestions from sessions and documents: one plain-language line each, grouped by workstream, with dates and a document's link. Ask which to add as a bullet, fold into an existing one, or leave out, and add none without a yes. Sessions with no title can't be described from their folder alone, so list them together by folder and day and ask what they were.
+Then offer the suggestions from sessions and documents: one plain-language line each, grouped by workstream, with dates and a document's link. Ask which to add as a bullet, fold into an existing one, or leave out, and add none without a yes. Leave out sessions with no title.
 
 Add what they mention, remove what they flag, and only then write to the doc. This step exists because the sources can't see everything, and the user is the only one who can fill the gaps.
 
