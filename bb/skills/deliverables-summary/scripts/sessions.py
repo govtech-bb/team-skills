@@ -15,8 +15,8 @@ though, so they can still name people or things from the work.
 
 Prints one JSON object. Claude Code deletes a transcript once it has had no activity
 for cleanupPeriodDays (30 by default), so history_starts is the oldest surviving
-transcript's last activity: sessions that ended before it are gone, and a period
-that starts before it is only partly covered.
+transcript's last activity. A period that starts before it is only partly covered:
+sessions that ended earlier were deleted, or there weren't any.
 
 Exits with an error when there are no transcripts at all, because an empty result
 would read as a period with no sessions in it.

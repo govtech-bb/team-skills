@@ -161,7 +161,7 @@ It lists the sessions the user sent prompts in during the period inside a work f
 
 Sessions are suggestions, not deliverables. Much of what they show is already covered by another source. The rest is often research, reviews, spikes, drafting or investigating that never became a commit, which is why they're worth reading. Time in a session isn't time worked, so never use sessions to estimate hours.
 
-If `history_starts` is after the period's first day, sessions that ended before it have been deleted (longer ones that began earlier survive, so some earlier days can still appear). Mention it in step 4, and if session suggestions made it into the tab, say so in the lead ("Claude Code sessions that ended before 5 Oct have been deleted, so some earlier work in this period may be missing").
+If `history_starts` is after the period's first day, the records don't cover the whole period: sessions that ended earlier were either deleted or never happened, and the script can't tell which (longer ones that began earlier survive, so some earlier days can still appear). Mention it in step 4, and if session suggestions made it into the tab, say so in the lead without claiming anything was lost ("Claude Code session records only go back to 5 Oct, so earlier work in this period may not be listed").
 
 ### Documents: Google Drive
 
