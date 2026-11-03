@@ -57,7 +57,7 @@ If the file is missing or has no `invoiceDay`, set up before doing anything else
 **Then fill in what's already known**, so most people only have to confirm:
 - **Name:** `gh api user --jq .name`, or git `user.name` if that's empty.
 - **Work email:** the email of the Claude account they're signed in with. GitHub emails are often private, so don't rely on `gh` for this.
-- **Work folders:** run `sessions.py` over the last 30 days with `--folder ~`, and suggest the folder that holds the user's clones of `githubOrgs` repos (the common parent of the session `folders` whose `git remote get-url origin` points at one). Only suggest a folder inside the home folder, never the home folder itself or anything above it.
+- **Work folders:** run `sessions.py` over the last 30 days with `--folder ~ --folders-only`. It prints only the distinct folders sessions ran in, not their titles, so personal sessions stay out of the conversation. Keep the folders whose `git remote get-url origin` points at a `githubOrgs` repo (a folder that's since been deleted can't be checked, so skip it). Suggest each distinct parent folder of those as its own `sessionFolders` entry, since clones often live in more than one place, and let the user remove any they don't want. Only suggest folders inside the home folder, never the home folder itself or anything above it.
 - **GitHub organisation:** `gh api user/orgs --jq '.[].login'`. If there's more than one, pick the organisation holding most of their pull requests from the last 90 days (`gh search prs --author @me --created ">=<90 days ago>" --json repository --limit 200`, counted by owner), and name the others as not included. Personal and side-project organisations should stay out of an HR record.
 
 Then send one message: what you found, followed by the two things only they can answer.
@@ -66,7 +66,7 @@ Then send one message: what you found, followed by the two things only they can 
 > - Name: **First Last** (from GitHub)
 > - Work email: **first.last@govtech.bb** (your Claude account)
 > - GitHub organisation: **govtech-bb**, where most of your recent pull requests are. Not included: other-org
-> - Work folder for Claude Code sessions: **~/Documents/Projects**, where your govtech-bb clones are
+> - Work folders for Claude Code sessions: **~/Documents/Projects** and **~/work**, where your govtech-bb clones are (remove any you don't want)
 >
 > I just need: what day of the month does your invoice period start (e.g. 23)? And do you have a work-log doc already (paste the link), or shall I create one with your first summary?
 

@@ -22,8 +22,9 @@ sessions that ended earlier were deleted, or there weren't any.
 Exits with an error when there are no transcripts at all, because an empty result
 would read as a period with no sessions in it.
 
-Usage: sessions.py --since 2026-09-23 --until 2026-10-23 --folder ~/Documents/Projects [--folder ...]
+Usage: sessions.py --since 2026-09-23 --until 2026-10-23 --folder ~/Documents/Projects [--folder ...] [--folders-only]
   --since / --until are dates; --until is exclusive.
+  --folders-only prints just the distinct folders, without titles, for picking which folders to keep.
 """
 import argparse
 import glob
@@ -76,6 +77,7 @@ def main():
     parser.add_argument("--until", required=True, help="exclusive")
     parser.add_argument("--folder", action="append", required=True, help="a folder the user does work in")
     parser.add_argument("--projects-dir", default="~/.claude/projects")
+    parser.add_argument("--folders-only", action="store_true", help="print only the distinct folders")
     args = parser.parse_args()
 
     start = datetime.fromisoformat(args.since).astimezone()
@@ -154,6 +156,13 @@ def main():
                "continued_in": s["continued_in"]}
               for session_id, s in sessions.items() if s["days"]]
     active.sort(key=lambda s: s["days"])
+
+    if args.folders_only:
+        print(json.dumps({
+            "window": {"since": args.since, "until_exclusive": args.until},
+            "folders": sorted({folder for s in active for folder in s["folders"]}),
+        }, indent=1))
+        return
 
     print(json.dumps({
         "window": {"since": args.since, "until_exclusive": args.until},
