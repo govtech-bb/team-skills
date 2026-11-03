@@ -2,8 +2,9 @@
 """List the user's Claude Code sessions that were active in a period.
 
 Claude Code keeps each session's transcript in ~/.claude/projects/<project>/<id>.jsonl.
-A session is kept when it has a record inside the window (local midnight to local
-midnight) whose working directory is under one of the --folder paths. Filtering on
+A session is kept when the user typed a prompt in it inside the window (local
+midnight to local midnight) while its working directory was under one of the
+--folder paths. Filtering on
 the folder rather than the git remote keeps working after a worktree is deleted,
 and keeps personal and side-project sessions out of an HR document.
 
@@ -49,7 +50,7 @@ def under(path, folders):
 
 # Transcripts from before Claude Code recorded a prompt's origin write these as ordinary
 # user messages, but nobody typed them.
-INJECTED = ("<task-notification", "[Request interrupted")
+INJECTED = ("<task-notification", "[Request interrupted", "<local-command-stdout", "<bash-stdout")
 
 
 def is_prompt(record):
@@ -59,11 +60,12 @@ def is_prompt(record):
         return False
     if "origin" in record:
         return (record["origin"] or {}).get("kind") == "human"
-    content = record.get("message", {}).get("content")
+    content = (record.get("message") or {}).get("content")
     if isinstance(content, list):
-        if any(part.get("type") == "tool_result" for part in content):
+        parts = [part for part in content if isinstance(part, dict)]
+        if any(part.get("type") == "tool_result" for part in parts):
             return False
-        content = next((part.get("text", "") for part in content if part.get("type") == "text"), "")
+        content = next((part.get("text", "") for part in parts if part.get("type") == "text"), "")
     return isinstance(content, str) and not content.lstrip().startswith(INJECTED)
 
 
@@ -80,16 +82,26 @@ def main():
     folders = [path_key(folder) for folder in args.folder]
     # Subagent transcripts sit one level deeper and belong to their parent session.
     transcripts = glob.glob(os.path.join(os.path.expanduser(args.projects_dir), "*", "*.jsonl"))
-    if not transcripts:
+    # Claude Code may delete a transcript while this runs.
+    last_activity = {}
+    for transcript in transcripts:
+        try:
+            last_activity[transcript] = os.path.getmtime(transcript)
+        except OSError:
+            pass
+    if not last_activity:
         sys.exit(f"no Claude Code transcripts in {args.projects_dir}")
-    last_activity = {transcript: os.path.getmtime(transcript) for transcript in transcripts}
     history_starts = datetime.fromtimestamp(min(last_activity.values())).astimezone()
 
     sessions = {}
-    for transcript in transcripts:
+    for transcript in last_activity:
         if last_activity[transcript] < start.timestamp():
             continue
-        with open(transcript, errors="replace") as lines:
+        try:
+            lines = open(transcript, errors="replace")
+        except OSError:
+            continue
+        with lines:
             for line in lines:
                 try:
                     record = json.loads(line)
@@ -111,9 +123,10 @@ def main():
                 elif kind == "continued-in":
                     session["continued_in"] = record.get("continuedInSessionId")
 
-                if not record.get("timestamp"):
+                try:
+                    when = parse_time(record["timestamp"])
+                except (KeyError, TypeError, ValueError):
                     continue
-                when = parse_time(record["timestamp"])
                 cwd = record.get("cwd")
                 if not (start <= when < end) or not cwd or not under(cwd, folders):
                     continue

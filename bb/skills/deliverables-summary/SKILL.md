@@ -57,7 +57,7 @@ If the file is missing or has no `invoiceDay`, set up before doing anything else
 **Then fill in what's already known**, so most people only have to confirm:
 - **Name:** `gh api user --jq .name`, or git `user.name` if that's empty.
 - **Work email:** the email of the Claude account they're signed in with. GitHub emails are often private, so don't rely on `gh` for this.
-- **Work folders:** run `sessions.py` over the last 30 days with `--folder ~`, and suggest the folder that holds the user's clones of `githubOrgs` repos (the common parent of the session `folders` whose `git remote get-url origin` points at one). Never suggest the home folder itself.
+- **Work folders:** run `sessions.py` over the last 30 days with `--folder ~`, and suggest the folder that holds the user's clones of `githubOrgs` repos (the common parent of the session `folders` whose `git remote get-url origin` points at one). Only suggest a folder inside the home folder, never the home folder itself or anything above it.
 - **GitHub organisation:** `gh api user/orgs --jq '.[].login'`. If there's more than one, pick the organisation holding most of their pull requests from the last 90 days (`gh search prs --author @me --created ">=<90 days ago>" --json repository --limit 200`, counted by owner), and name the others as not included. Personal and side-project organisations should stay out of an HR record.
 
 Then send one message: what you found, followed by the two things only they can answer.
