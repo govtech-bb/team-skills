@@ -1,13 +1,13 @@
 ---
 name: deliverables-summary
-description: Build a plain-language summary of everything the user delivered during one invoice period (from their invoice day in one month to the day before it in the next), drawn from git commits, PRs and closed issues and the user's Google Calendar, plus what the user adds, then add it as a new tab in their running Claude Doc work log so HR or a manager can see the work behind an invoice. Use this whenever the user asks for a deliverables summary, an invoice summary, monthly work summary, timesheet narrative, "what did I do this month", a record of work for HR or payroll, or wants to update their work log, even if they don't say "invoice". Also use it to change their saved invoice day, doc or sources ("change my invoice date"). Not for daily standups (use /bb:standup) or weeknotes. Use when the user invokes /bb:deliverables-summary.
+description: Build a plain-language summary of everything the user delivered during one invoice period (from their invoice day in one month to the day before it in the next), drawn from git commits, PRs and closed issues and the user's Google Calendar, with suggestions from their Claude Code sessions and Google Drive documents, plus what the user adds, then add it as a new tab in their running Claude Doc work log so HR or a manager can see the work behind an invoice. Use this whenever the user asks for a deliverables summary, an invoice summary, monthly work summary, timesheet narrative, "what did I do this month", a record of work for HR or payroll, or wants to update their work log, even if they don't say "invoice". Also use it to change their saved invoice day, doc or sources ("change my invoice date"). Not for daily standups (use /bb:standup) or weeknotes. Use when the user invokes /bb:deliverables-summary.
 ---
 
 # Deliverables summary
 
 The reader is HR, a manager or finance, not an engineer. They need to understand what was delivered in the period and why it mattered, so they can match it to an invoice. The user also keeps every period's summary as a permanent record. That's why output goes into **one running Claude Doc with a tab per period**: each tab can be exported on its own for an invoice, and together they form the history.
 
-Much of the user's work never reaches a repo: workshops, stakeholder meetings, reviews, design discussions and help given to colleagues. A summary built only from git undersells the period, so this skill reads code and calendar activity and then asks the user what's still missing.
+Much of the user's work never reaches a repo: workshops, stakeholder meetings, reviews, design discussions and help given to colleagues. A summary built only from git undersells the period, so this skill reads code and calendar activity, suggests work it finds in the user's Claude Code sessions and Google Drive documents, and then asks the user what's still missing.
 
 The skill does not read Slack or other chat tools, even if a connector is available. A chat connector needs wide access, and those conversations are often sensitive. Work that only shows up in chat comes from the user in step 4.
 
@@ -16,7 +16,7 @@ The skill does not read Slack or other chat tools, even if a connector is availa
 - **Python 3**, for the bundled scripts (standard library only), and **`gh`** signed in with access to the user's GitHub organisation.
 - **The Claude Docs connector**, for the work log. If its tools aren't available, say so and offer to write the period's summary as a Markdown file instead.
 - **The Google Calendar connector**, for meetings, connected through `/mcp` with calendar access granted. Without it, the summary has no meetings, so help the user connect it first.
-- **The Google Drive connector**, only if the user opts in to meeting notes (`useMeetingNotes`).
+- **The Google Drive connector**, for documents the user edited, and for meeting notes if they opt in (`useMeetingNotes`). Without it, documents only come from the user in step 4.
 
 ## Configuration
 
@@ -28,6 +28,7 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
   "docUrl": "https://claude.ai/artifact/…",
   "githubOrgs": ["govtech-bb"],
   "calendarEmail": "first.last@govtech.bb",
+  "sessionFolders": ["~/Documents/Projects"],
   "name": "First Last",
   "role": "Frontend Developer, GovTech Barbados",
   "preferences": {}
@@ -38,23 +39,25 @@ Settings live in `~/.claude/deliverables-summary-config.json`, which is global a
 - `docUrl` is the running work-log doc, a Claude Doc. Leave it out until the first summary creates it.
 - `githubOrgs` is where the skill looks for the user's work: every repo in these GitHub organisations, whether or not it's cloned locally. It also keeps personal and side-project repos out of an HR document. Someone who doesn't work in code (a designer, a delivery manager) can leave it empty, and the code source is skipped.
 - `calendarEmail` is the address the user's invites go to. It's how the skill finds their RSVP, so declined meetings are dropped.
+- `sessionFolders` lists the folders the user does GovTech work in. Claude Code sessions are only read from these folders and the folders inside them (see Claude Code sessions below), which keeps personal and side projects out of an HR document, as `githubOrgs` does for code. Leave it empty to skip sessions.
 - `name` goes in each tab's heading. `role` is optional and only used if the user asks for it somewhere.
 - `preferences` holds answers the user has already given, so step 4 doesn't ask the same thing every month. When the user answers one of these in step 4, offer to save it here. Until they've answered, use the cautious default in brackets:
   - `countUnansweredInvites` (`"except large"`): how to treat invites the user never answered. `"except large"` counts them as attended but checks big one-off sessions; `true` counts every one; `false` asks about every one. Most people never reply to recurring team meetings, which is why counting is the default. The "possibly away" check under Meetings applies whatever this says.
   - `noteLeave` (false): if false, never mention leave or time off, including as the reason for a handover. Leave is personal, so it only goes in when the user says so.
-  - `quietStretches` (ask): how to describe stretches with no code activity that the user confirms they were working, e.g. "design work in Figma and workshops". There's no default: until the user has said, ask what they worked on rather than assuming. Put it as one line under Meetings and collaboration, with the dates.
+  - `quietStretches` (ask): what the user works on in stretches with no code activity that they confirm they were working, e.g. "design work in Figma and workshops". There's no default: until the user has said, ask what they worked on rather than assuming. Put it as one line under Meetings and collaboration, with the dates, saying only what they did, never that there was no activity.
   - `useMeetingNotes` (false): if true, read the AI meeting notes attached to meetings the user attended, only to find their own contributions (see Meetings below). Off unless the user turns it on.
   - `nameColleagues` (false): if false, say "a teammate" or "a designer" instead of names. Other people didn't choose to appear in this person's HR record.
 
 ### First run, or "change my invoice date"
 
-If the file is missing or has no `invoiceDay`, set up before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop.
+If the file is missing or has no `invoiceDay`, set up before doing anything else. On a "change" request, ask only for what they want to change, save it, confirm, and stop. If the file has no `sessionFolders` key at all (it was set up before sessions were a source), suggest work folders and offer the session history setting, as below, before step 1. If they don't want sessions read, save `sessionFolders` as `[]` so they aren't asked again.
 
-**First, check what the skill needs**, so nothing fails halfway through the first summary: `gh auth status` (signed in, with access to their organisation), that the Claude Docs tools are available, and that the Google Calendar connector can read events (a one-day `list_events` call is enough). Tell the user what's missing and how to fix it, in one short list. They can carry on without a source, but say what the summary will lack.
+**First, check what the skill needs**, so nothing fails halfway through the first summary: `gh auth status` (signed in, with access to their organisation), that the Claude Docs tools are available, that the Google Calendar connector can read events (a one-day `list_events` call is enough), and that the Google Drive connector can list files (`list_recent_files` with `pageSize` 1). Tell the user what's missing and how to fix it, in one short list. They can carry on without a source, but say what the summary will lack.
 
 **Then fill in what's already known**, so most people only have to confirm:
 - **Name:** `gh api user --jq .name`, or git `user.name` if that's empty.
 - **Work email:** the email of the Claude account they're signed in with. GitHub emails are often private, so don't rely on `gh` for this.
+- **Work folders:** run `sessions.py` over the last 30 days with `--folder ~ --folders-only`. It prints only the distinct folders sessions ran in, not their titles, so personal sessions stay out of the conversation. Keep the folders whose `git remote get-url origin` points at a `githubOrgs` repo (a folder that's since been deleted can't be checked, so skip it). Sessions often run in a subfolder or a worktree, so map each kept folder to its main repo first: `git -C <folder> rev-parse --path-format=absolute --git-common-dir` gives the main repo's `.git`, and the folder above that repo is the one to suggest. Drop any suggestion that sits inside another, and suggest each one left as its own `sessionFolders` entry, since clones often live in more than one place. Let the user remove any they don't want. Only suggest folders inside the home folder, never the home folder itself or anything above it.
 - **GitHub organisation:** `gh api user/orgs --jq '.[].login'`. If there's more than one, pick the organisation holding most of their pull requests from the last 90 days (`gh search prs --author @me --created ">=<90 days ago>" --json repository --limit 200`, counted by owner), and name the others as not included. Personal and side-project organisations should stay out of an HR record.
 
 Then send one message: what you found, followed by the two things only they can answer.
@@ -63,6 +66,7 @@ Then send one message: what you found, followed by the two things only they can 
 > - Name: **First Last** (from GitHub)
 > - Work email: **first.last@govtech.bb** (your Claude account)
 > - GitHub organisation: **govtech-bb**, where most of your recent pull requests are. Not included: other-org
+> - Work folders for Claude Code sessions: **~/Documents/Projects** and **~/Code**, where your govtech-bb clones are (remove any you don't want)
 >
 > I just need: what day of the month does your invoice period start (e.g. 23)? And do you have a work-log doc already (paste the link), or shall I create one with your first summary?
 
@@ -71,6 +75,8 @@ Then send one message: what you found, followed by the two things only they can 
 - If the calendar check failed, help them connect it (`/mcp`, choose claude.ai Google Calendar, and tick the calendar permission).
 
 Write the file with whatever tool fits, then show the user what was saved.
+
+**Then offer to keep session history longer**, unless `sessionFolders` is empty. Claude Code deletes session transcripts after `cleanupPeriodDays` days (set in `~/.claude/settings.json`, 30 when unset), so by invoice day the start of a period is often already gone. Tell the user the current value, the date their history starts (`history_starts` from `sessions.py`) and how much space it takes (`du -sh ~/.claude/projects`), and ask how many days of history they'd like to keep, if they want to change it. Only change the setting when they give a whole number of 1 or more (0 doesn't mean "keep forever": it stops Claude Code keeping history at all): add or update that one key in the existing file, leave everything else as it is, and show them the change.
 
 **Then ask how far back to go:** "Just the latest period, or every month since you started?" Someone new to the skill usually has months of work with no record. For every month, follow [Back-filling several periods](#back-filling-several-periods).
 
@@ -135,13 +141,37 @@ Then:
 
 - Drop anything that isn't work, and recompute the hours without it. That means placeholder blocks the user made for themselves ("Lunch", "Focus time", "Hold", "Commute": usually no other attendees, often recurring), personal bookings (tickets, travel, weekend plans), and team socials such as a team lunch out.
 - **Unanswered invites** (`needsAction`) count as attended, because most people never reply to recurring meetings (if `countUnansweredInvites` is `false`, ask about each instead), with two exceptions:
-  - **Possibly away.** First look for runs of two or more working days where every meeting is unanswered, the user accepted or organised nothing, and there's no GitHub activity: no commit `date`, no PR `opened` or `closed` day, no `closed` day of an issue the user closed themselves, and no `reviewed_on` day from the script (all local dates). That pattern looks like time off that wasn't put in the calendar. Don't count those days' meetings or hours. In step 4 ask one neutral question per run, e.g. "There's no activity and no accepted meetings 3–7 Oct. Were you working those days?" If no, leave the days out (and, unless `noteLeave` is true, don't mention leave). If yes, count the meetings and ask what they worked on, since it wasn't code. Never describe such a stretch as any kind of work, from `quietStretches` or anywhere else, before the user has confirmed they were working. This check applies whatever `countUnansweredInvites` says.
+  - **Possibly away.** First look for runs of two or more working days where every meeting is unanswered, the user accepted or organised nothing, and there's no GitHub activity: no commit `date`, no PR `opened` or `closed` day, no `closed` day of an issue the user closed themselves, no `reviewed_on` day from the script, and no day in a Claude Code session's `days` (all local dates). That pattern looks like time off that wasn't put in the calendar. Don't count those days' meetings or hours. In step 4 ask one neutral question per run, e.g. "There's no activity and no accepted meetings 3–7 Oct. Were you working those days?" If no, leave the days out (and, unless `noteLeave` is true, don't mention leave). If yes, count the meetings and ask what they worked on, since it wasn't code. Never describe such a stretch as any kind of work, from `quietStretches` or anywhere else, before the user has confirmed they were working. This check applies whatever `countUnansweredInvites` says.
   - **Big one-off sessions.** A one-off meeting with 8 or more invitees (a workshop, all-hands, town hall) is one people often skip. Unless `countUnansweredInvites` is `true`, list these in step 4 for a quick yes or no.
   Either way, ask what they presented or ran: the calendar can't show that.
 - Check the all-day events for leave, sick days, public holidays or training days. Don't put them in the summary, but mention any that look like time off in step 4 so the user can decide whether the invoice should note them.
 - Recurring series become one line each with a count ("Daily stand-ups ×21"). They show steady participation, but listing them one by one buries the meetings that matter.
 - Pick out the one-off meetings that carry outcomes: workshops, user research sessions, show-and-tells, stakeholder or MDA meetings, demos, onboarding or training given, and interviews. Use the title, description and attendee domains to work out the purpose. For example, a `*.gov.bb` domain other than the user's own points to a meeting with a ministry or department.
 - Keep the approximate total hours in meetings. HR often finds this useful.
+
+### Claude Code sessions
+
+Skip this when `sessionFolders` is empty.
+
+```bash
+python3 <skill>/scripts/sessions.py --since <start_date> --until <end_exclusive_date> --folder <each sessionFolder>
+```
+
+It lists the sessions the user sent prompts in during the period inside a work folder, each with its title, the days they sent prompts, a prompt count, its folders and git branches, and the pull requests it linked. It never returns prompt or reply text, and you must not open the transcripts to find out: they can hold secrets, tokens and personal data from the work itself. Work from the titles, folders and branches alone. Titles are generated from the prompts, so they can still name a person or quote something sensitive: reword them in plain language rather than repeating them. A session with `continued_in` carried on in that other session, so treat the two as one piece of work. If the script exits with an error, say that sessions are missing and why.
+
+Sessions are suggestions, not deliverables. Much of what they show is already covered by another source. The rest is often research, reviews, spikes, drafting or investigating that never became a commit, which is why they're worth reading. Time in a session isn't time worked, so never use sessions to estimate hours.
+
+If `history_starts` is after the period's first day, the records don't cover the whole period: sessions that ended earlier were either deleted or never happened, and the script can't tell which (longer ones that began earlier survive, so some earlier days can still appear). Mention it in step 4, and if session suggestions made it into the tab, say so in the lead without claiming anything was lost ("Claude Code session records only go back to 5 Oct, so earlier work in this period may not be listed").
+
+### Documents: Google Drive
+
+Only for the latest complete period or the current one. Drive doesn't say when the user last edited a file, so an older period can't be told apart from everything since it. When back-filling, use it for the latest period only, and say why the others have no document suggestions.
+
+Use the Google Drive connector's `list_recent_files` with `orderBy` = `lastModifiedByMe`, `excludeContentSnippets` = true and `pageSize` = 50, following `nextPageToken`. Files come back newest edit first, followed by files the user never edited. First drop folders, meeting notes and recordings, such as "Notes by Gemini" (those follow the meeting-notes rule above): Drive can count them as the user's edits even when they never opened them. Then, since a file has to be opened before it's edited, stop at the first remaining file whose `viewedByMeTime` is before the period starts: every file after it was last edited before the period. A file with no `viewedByMeTime` was never opened. If the user owns it, it's usually their own upload or sync, so skip it and carry on, and keep it if its `createdTime` or `modifiedTime` is in the period. If they don't own it (including files on a shared drive, which have no `owner`), stop there: the files the user never edited start at that point. Of the files kept, drop those created after the period's last day: they can't hold work from it.
+
+**Read only, titles and metadata only.** Don't open the documents, and never create, change or share anything. Drop anything that isn't work. A file the user only opened after the period may not have been edited in it, so like sessions, documents are suggestions for step 4.
+
+If the connector isn't available, carry on and say that documents are missing.
 
 ## Step 3: Turn activity into deliverables
 
@@ -160,6 +190,8 @@ Work committed straight to the main branch has no pull request to link. When mos
 
 **Account for every merged PR.** Each one backs a bullet, or is deliberately left out. Small fixes can share a bullet with related work, but a PR that matches no bullet is a gap in the summary or a sign it isn't worth listing, and only the user knows which. Collect these orphans for step 4 rather than dropping them silently.
 
+**Match sessions and documents to what's already found.** A session that linked one of the returned PRs (`prs`), or whose folder, branch or title names a returned PR or issue in the same repo (worktrees are often named after one, like `case-management-429` for issue 429 in `case-management`), is the same work: drop it. A bare number with no repo to match isn't enough. So is a document a deliverable or meeting already covers, such as the design doc behind a PR or the agenda for a workshop. Drop sessions with no title, and any whose title, folder and branch don't clearly show GovTech work. Don't ask about them. What's left is work no other source shows. Turn each into a one-line suggestion in the right workstream, merging sessions that are clearly the same piece of work, and keep them for step 4 instead of putting them in the draft.
+
 Fold meetings into the workstream they belong to. A workshop about the case system goes under the case system, not in a separate meetings pile. Only meetings that serve no single workstream go in the collaboration section.
 
 ## Step 4: Ask what's missing
@@ -175,6 +207,8 @@ Show the user a short draft in the terminal: the workstreams and their deliverab
 Is anything here that shouldn't be shared with HR?"
 
 If any merged PRs back no bullet, list them by plain-language title with their links, and ask for each: add it as a bullet (or fold it into an existing one), or leave it out. Ask the same about closed issues someone else closed, and about ones with `earlier_work`, linking that earlier work so the user can see whether it was billed already.
+
+Then offer the suggestions from sessions and documents: one plain-language line each, grouped by workstream, with dates and a document's link. Ask which to add as a bullet, fold into an existing one, or leave out, and add none without a yes. Leave out sessions with no title.
 
 Add what they mention, remove what they flag, and only then write to the doc. This step exists because the sources can't see everything, and the user is the only one who can fill the gaps.
 
@@ -231,6 +265,8 @@ Use this layout every time, so tabs are consistent across months and HR knows wh
 
 Leave out any section with nothing in it, except Deliverables. There is no separate list of links at the end: each link sits on the bullet it backs, so a links-only section would only repeat the deliverables.
 
+Never mention gaps, quiet stretches or days without activity in the tab. Questions about them belong in step 4, and a confirmed stretch is described only by the work done.
+
 ### Exporting for an invoice
 
 When the user asks to export a period, use the docs connector's export on **that period's tab only**, as PDF or Word (docx), whichever they say. Save the file where they ask, defaulting to `~/Downloads/<period label> - <name> - Deliverables Summary.<ext>`. The PR links stay in the export, because they're the evidence behind each claim.
@@ -239,8 +275,8 @@ When the user asks to export a period, use the docs connector's export on **that
 
 When the user wants a run of past periods, such as every month since they started:
 
-1. **Find where the history starts.** Look for the earliest work in each source: the earliest PR in `githubOrgs`, the earliest commit, and the earliest event in the calendar. Ask the user for their start date if the first period would only be partly covered. Tell them which months have no calendar data.
-2. **Gather and draft each period separately**, in parallel. Use one subagent per period if you can, but start no more than four at a time: GitHub allows 30 searches a minute, and each period makes five. If a period hits the rate limit, wait a minute and run it again. Each one runs the script and reads the calendar for its window, follows steps 2 and 3, and returns a draft in the period tab layout, plus its own questions: large unanswered invites, possible leave, and gaps such as weeks with no activity. Drafting period by period keeps work from one month leaking into another.
+1. **Find where the history starts.** Look for the earliest work in each source: the earliest PR in `githubOrgs`, the earliest commit, the earliest event in the calendar, and `history_starts` for sessions. Ask the user for their start date if the first period would only be partly covered. Tell them which months have no calendar data or no session history.
+2. **Gather and draft each period separately**, in parallel. Use one subagent per period if you can, but start no more than four at a time: GitHub allows 30 searches a minute, and each period makes five. If a period hits the rate limit, wait a minute and run it again. Each one runs the scripts and reads the calendar for its window (Drive only for the latest period, see above), follows steps 2 and 3, and returns a draft in the period tab layout, plus its own questions: large unanswered invites, possible leave, and gaps such as weeks with no activity. Drafting period by period keeps work from one month leaking into another.
 3. **Run step 4 once for the whole run**, not once per period. Show a short outline of every period (main focus plus 3–5 headline deliverables), then the questions grouped by period. Asking seven separate times wears the user out.
 4. **Write one tab per period** with its own order key, plus one Overview row each. Thinly covered months still get a tab. Say what's thin in the lead ("Calendar records start in April, so meetings for this period aren't listed"), rather than padding.
 
