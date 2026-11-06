@@ -34,7 +34,7 @@ If you find anything, present a short table summarizing each finding, walk throu
 
 If nothing's missed, say so in one line and move on.
 
-Leverage review and explore subagents where applicable, to check over the content provided, and have them report back to you with their findings.
+For a large diff, dispatch an `Explore` agent to sweep it for the items above and report back, so the file reads stay out of your context. This step is only the missed-work check: the full `bb:dev-reviewer` pass runs once the PR exists (see *Reviewing the PR* below).
 
 ## 3. Capture decisions worth recording
 
