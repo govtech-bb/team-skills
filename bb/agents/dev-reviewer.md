@@ -35,8 +35,22 @@ checkout, and remove the worktree when you're done:
 ```bash
 W=$(mktemp -d)/w && git worktree add --detach "$W" <HEAD_SHA>
 # … install, break things, run tests in "$W" …
-git worktree remove --force "$W"
+git worktree remove --force "$W" && rm -rf "${W%/w}"
 ```
+
+If an earlier run was interrupted before that last line, run `git worktree prune` first to clear its
+stale entry.
+
+Running the PR's code runs its install scripts and tests on the user's machine, with their `gh`
+token in reach. Only run it when the PR's branch is in `R` itself, or its author is an owner, member
+or collaborator:
+
+```bash
+gh api repos/<R>/pulls/<N> --jq '.head.repo.full_name, .author_association'
+```
+
+Otherwise — or if the head repo is gone or you can't tell — skip steps 3 and 4, review by reading,
+and say in the body that you didn't run the PR's code and why.
 
 If the linked issues are missing from the dispatch, collect them. `closingIssuesReferences` alone
 misses PRs on a non-default base and "Part of #N", so also take `#N`, `owner/repo#N` and issue URLs
@@ -77,6 +91,9 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
    component state over time, caches and clocks — write a targeted test or a small reproduction in
    the scratch worktree and run it. Don't give a verdict on that behaviour from reading alone; if
    you couldn't run it, say so in the body.
+
+   Skip steps 3–4 when the PR changes no executable behaviour (docs, comments, config nothing
+   reads at runtime), and skip them when the rule under *Inputs* says not to run the PR's code.
 5. Review the diff for **duplication, inconsistencies, logic and structure**, plus the repo's own
    rules. Include handed-down findings and open threads from an earlier review.
 6. Verify every finding against `$HEAD_SHA` and give it one verdict:

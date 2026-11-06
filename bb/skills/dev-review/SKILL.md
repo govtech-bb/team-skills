@@ -73,7 +73,8 @@ grep -rn "<symbol>" src/                     # wrong — whatever is checked out
 
 Always dispatch one `bb:dev-reviewer` for the PR, however small: it traces the PR's promises, breaks
 the main behaviour to check a test fails, and runs what reading can't settle, in a scratch
-worktree. Its tool output stays out of your context and it returns a draft with a verification log.
+worktree (only for PRs from this repo or a trusted author, and only when the PR changes
+executable behaviour). Its tool output stays out of your context and it returns a draft with a verification log.
 Findings handed to you (from `/code-review` or another pass) go to it as *Handed-down findings to
 verify*, not straight to *Sort findings*.
 
