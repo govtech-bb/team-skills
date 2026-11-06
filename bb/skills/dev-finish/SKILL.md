@@ -144,6 +144,9 @@ in the conversation).
   [dev-review §1](../dev-review/SKILL.md#1-pin-the-ref), then dispatch the
   agent with the prompt in [dev-review §2](../dev-review/SKILL.md#2-get-findings).
   Linked issues are the ones this work targets; guidance is the user's, or none.
+- **Check the draft** before presenting it, as dev-review §2 says: re-run the
+  evidence for every `Fabricated` and `Pre-existing` line in its verification
+  log, and for one `Real` line. If a check disagrees, fix the draft.
 - **Present, don't post.** Show the user the draft's verdict, its blocking
   findings and its non-blocking ones. Never post it to GitHub — it's the author
   reviewing their own PR.
