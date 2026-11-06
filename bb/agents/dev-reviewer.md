@@ -1,6 +1,6 @@
 ---
 name: dev-reviewer
-description: Reviews one GitHub pull request at pinned commits and returns a verified draft review (verdict, summary, inline comments) without posting it. Traces the PR's promises, checks its tests can fail, and runs targeted checks in a scratch worktree. Dispatched by /bb:dev-review for every PR, one per PR when several are reviewed in parallel.
+description: Reviews one GitHub pull request at pinned commits and returns a verified draft review (verdict, summary, inline comments) without posting it. Traces the PR's promises, checks its tests can fail, and runs targeted checks in a scratch worktree. Dispatched by /bb:dev-review for every PR, one per PR when several are reviewed in parallel, and by /bb:dev-finish for each PR it opens.
 tools: Bash, Read, Grep, Glob, Write, Edit
 ---
 
