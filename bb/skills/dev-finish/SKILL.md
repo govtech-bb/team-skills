@@ -147,9 +147,9 @@ in the conversation).
 - **Present, don't post.** Show the user the draft's verdict, its blocking
   findings and its non-blocking ones. Never post it to GitHub — it's the author
   reviewing their own PR.
-- **Blocking findings** go through the same walk-through as §2: one at a
-  time, the user decides each, then implement the decisions in one pass,
-  commit, and push to the PR's branch.
+- **Blocking findings** go through the same walk-through as *2. Review for
+  missed work* above: one at a time, the user decides each, then implement
+  the decisions in one pass, commit, and push to the PR's branch.
 
 ### When work is finished, close the related GitHub issue
 
