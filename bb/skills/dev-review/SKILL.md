@@ -115,6 +115,10 @@ If you already hold a review on the PR, its threads are the first input. Per thr
 `$HEAD_SHA` close it — resolved, still open, or filed as an issue? Don't re-raise resolved or
 filed ones. The summary names which closed and the evidence (the test, the line).
 
+Then review the commits since your last review as new code, failure paths included — not only the
+lines your threads named. A fix can close your thread and open a new path: a check placed after a
+call that already had side effects, inside a `try` whose `catch` returns early.
+
 ```bash
 gh api --paginate repos/$R/pulls/$N/reviews --jq ".[] | select(.user.login==\"$ME\") | \"\(.id)\t\(.state)\t\(.submitted_at)\""
 gh api --paginate repos/$R/pulls/$N/comments --jq '.[] | select(.pull_request_review_id==<id>) | "\(.path):\(.line)\t\(.body[0:80])"'
@@ -169,6 +173,10 @@ order.
 - <finding> — needs a new result variant and UI handling
 ```
 
+A limit the PR hands to another issue ("known limit, tracked in #N") is out of scope only once you
+have read #N and it describes that limit. If you can't read it, say so; don't approve on the PR's
+word.
+
 If something out of scope genuinely should block, say why it cannot wait; otherwise it is a
 follow-up, and naming it as one is what keeps the PR reviewable.
 
@@ -199,6 +207,17 @@ Don't approve over failing or pending required checks: say in the body what you 
 `CONFLICTING` PR runs little or no CI, so its green is not evidence. If the PR lists no checks at
 all, its base branch has no CI. In that case build and test `$HEAD_SHA` yourself in a scratch
 worktree before approving, or say plainly in the body that you didn't.
+
+**Can't see it? Don't approve.** Treat anything you could not see as pending, not passed:
+
+- CI you could not read (a 403, or no answer), or that has not finished;
+- a linked issue you could not open;
+- a PR that changes executable behaviour where the agent's verification log shows it ran nothing
+  (its steps 3–4 skipped).
+
+Post `"event":"COMMENT"` instead. Say exactly what you could not see or run, and the verdict you
+would give once it is checked. "Confirm CI is green before merging" inside an approval hands the
+check to whoever merges, and they will assume you did it.
 
 **Your own PR:** if `$AUTHOR` = `$ME`, GitHub rejects `APPROVE` and `REQUEST_CHANGES` with a 422.
 Post with `"event":"COMMENT"`, and have the body say which findings would block, since a comment

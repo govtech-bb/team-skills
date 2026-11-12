@@ -110,6 +110,8 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
 7. For earlier threads and fixes you're asked to verify: state whether `$HEAD_SHA` resolves each,
    with the evidence (test, line). Resolved means the original promise now holds on every path from
    step 2, not just that the change is present — a fix can close one path and break another.
+   Then review the commits since that review as new code — steps 2–6 in full, failure paths
+   included — not only the lines the threads named.
 8. Sort real findings: **in scope** (the author acts on it now) or **out of scope** (a refactor
    the PR only touches, pre-existing debt, a follow-up it enables).
 9. Decide: `APPROVE` or `REQUEST_CHANGES`. `APPROVE` only if you would merge as-is. Anything that
@@ -119,11 +121,16 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
    don't file it as a note. A **decision** the author can take either way, and nits, don't block:
    `APPROVE` with them inline.
 
+   Never `APPROVE` blind. If you could not read CI or a linked issue, or you skipped steps 3–4 on
+   a PR that changes executable behaviour, the verdict is `COMMENT`: list what you could not check,
+   and the verdict you would give once it is checked.
+
 ## Output
 
 Return exactly these parts, in order:
 
-1. **Verdict** — `APPROVE` or `REQUEST_CHANGES`, with one sentence of reason.
+1. **Verdict** — `APPROVE` or `REQUEST_CHANGES` (or `COMMENT` when step 9 says you are reviewing
+   blind), with one sentence of reason.
 2. **Draft review JSON**, ready for `POST repos/$R/pulls/$N/reviews`:
 
    ```json
