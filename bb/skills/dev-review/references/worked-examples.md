@@ -118,3 +118,21 @@ The `PUT` succeeded and the body was unchanged. `sub()` takes a regex; the `**` 
 not a literal there, so nothing matched and the unchanged body was sent back. `split($o) | join($n)`
 is literal, and the check belongs on the response — `--jq .body | grep -c "$NEW"` — not on the file
 you built.
+
+## Can't see it? Don't approve — an approval that checked nothing
+
+A re-review confirmed that the reviewer's own thread was fixed and approved. Its body said, honestly,
+that the token got 403s from the checks and issues endpoints, that nothing was built or run, and
+"confirm CI is green before merging". CI had not finished when it approved, and the linked issue
+that the PR's "known limits" pointed to had not been read.
+
+Running the PR afterwards found three things that review could not have seen:
+
+- the new check ran inside a `try` after a call that had already created a session, and its `catch`
+  returned early, so a thrown error left the session in place (a failure path in the new commits,
+  not in the reviewer's old thread);
+- the log line the description promised had no test (removing it failed nothing);
+- the "known limit" handed to the other issue was a live hole the issue still described wrongly.
+
+Each needed something the review had marked as unavailable. When a review can't see CI, a linked
+issue, or the code running, its verdict is a `COMMENT` that says what is missing, not an approval.
