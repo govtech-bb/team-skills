@@ -70,6 +70,30 @@ pre-existing trigger with no cascade guard. The correct fix was to move the line
 
 Verify the fix you suggest, not just the defect you found.
 
+## Security lens — one door fixed, three left open
+
+A PR fixed an access-control finding: a page refused a sensitive account change in a state where
+it shouldn't be allowed, but the server action behind the page did not, so a direct request made
+the change anyway. The fix added the check to the action and was approved. The review then missed
+three things, each found later:
+
+1. **The other branch into the same action.** The action identified its caller in one of two ways,
+   and only one was guarded. The description said the other *couldn't* be guarded, because two kinds
+   of request looked identical at that point. The review accepted that. It was false: the check read
+   stored **state**, not request kind, and the legitimate flow had already changed that state, so it
+   passed untouched. A sibling function the page already called made exactly this check for both
+   kinds. The linked issue had also said both paths needed it. (*Security lens* steps 1 and 4, and
+   the linked-issue rule in *Pin the ref*.)
+2. **What happened before the refusal.** Once the second branch was guarded, it refused *after* a
+   library call that had already signed the caller in. The refusal returned early and left that
+   sign-in in place. (*Security lens* step 3.)
+3. **A door the PR never touched.** A framework route reached the same effect without calling the
+   action at all. A follow-up issue had just been downgraded to "not a vulnerability any more" on the
+   strength of the action fix. (*Security lens* steps 1 and 5.)
+
+Each was one question away: *list every way into the effect, then ask what each one has already
+done by the time the guard runs.*
+
 ## Post as one review — 28 reviews instead of one
 
 The inline comments were raised with `POST /pulls/{n}/comments`, one call per finding. That endpoint

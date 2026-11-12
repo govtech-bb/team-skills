@@ -35,7 +35,7 @@ Updates auto-propagate: when a PR merges to `main`, Claude Code picks up the new
 
 | Agent | Use it when |
 |---|---|
-| `bb:dev-reviewer` | Dispatched by `/bb:dev-review` for every PR, and by `/bb:dev-finish` for each PR it opens. Reviews one PR at pinned commits: traces its promises, checks the tests can fail, and runs targeted checks in a scratch worktree, then returns a draft review. It never posts |
+| `bb:dev-reviewer` | Dispatched by `/bb:dev-review` for every PR, and by `/bb:dev-finish` for each PR it opens. Reviews one PR at pinned commits: traces its promises, threat-models changes that touch auth or access control, checks the tests can fail, and runs targeted checks in a scratch worktree, then returns a draft review. It never posts |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new ones.
 
