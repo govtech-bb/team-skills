@@ -82,14 +82,14 @@ three things, each found later:
    of request looked identical at that point. The review accepted that. It was false: the check read
    stored **state**, not request kind, and the legitimate flow had already changed that state, so it
    passed untouched. A sibling function the page already called made exactly this check for both
-   kinds. The linked issue had also said both paths needed it. (*Security lens* steps 1 and 4, and
-   the linked-issue rule in *Pin the ref*.)
+   kinds. The linked issue had also said both paths needed it. (`dev-reviewer.md` *Security lens*
+   steps 1 and 4, and the linked-issue rule in `SKILL.md` §1.)
 2. **What happened before the refusal.** Once the second branch was guarded, it refused *after* a
    library call that had already signed the caller in. The refusal returned early and left that
-   sign-in in place. (*Security lens* step 3.)
+   sign-in in place. (`dev-reviewer.md` *Security lens* step 3.)
 3. **A door the PR never touched.** A framework route reached the same effect without calling the
    action at all. A follow-up issue had just been downgraded to "not a vulnerability any more" on the
-   strength of the action fix. (*Security lens* steps 1 and 5.)
+   strength of the action fix. (`dev-reviewer.md` *Security lens* steps 1 and 5.)
 
 Each was one question away: *list every way into the effect, then ask what each one has already
 done by the time the guard runs.*

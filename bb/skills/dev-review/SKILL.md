@@ -71,8 +71,9 @@ grep -rn "<symbol>" src/                     # wrong — whatever is checked out
 
 ## 2. Get findings
 
-Always dispatch one `bb:dev-reviewer` for the PR, however small: it traces the PR's promises, breaks
-the main behaviour to check a test fails, and runs what reading can't settle, in a scratch
+Always dispatch one `bb:dev-reviewer` for the PR, however small: it traces the PR's promises,
+threat-models changes that touch auth or access control, breaks the main behaviour to check a test
+fails, and runs what reading can't settle, in a scratch
 worktree (only for PRs from this repo or a trusted author, and only when the PR changes
 executable behaviour). Its tool output stays out of your context and it returns a draft with a verification log.
 Findings handed to you (from `/code-review` or another pass) go to it as *Handed-down findings to
@@ -103,8 +104,9 @@ Pass the user's guidance in their words. Don't add your own "already decided" li
 to confirm a fix is present: ask whether the promise it was for now holds.
 
 **Check the draft before you use it.** Re-run the evidence command for every `Fabricated` and
-`Pre-existing` line in the agent's verification log, and for one `Real` line. These are the verdicts
-that drop or soften a finding, so a wrong one costs most. If a check disagrees, the draft is wrong:
+`Pre-existing` line in the agent's verification log, for one `Real` line, and, if the Security lens
+ran, for at least one `Door | … | guarded` line. These are the verdicts that drop or soften a
+finding, so a wrong one costs most. If a check disagrees, the draft is wrong:
 fix it, don't post around it.
 
 ## 3. Sort findings
