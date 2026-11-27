@@ -1,6 +1,6 @@
 ---
 name: dev-reviewer
-description: Reviews one GitHub pull request at pinned commits and returns a verified draft review (verdict, summary, inline comments) without posting it. Traces the PR's promises, checks its tests can fail, and runs targeted checks in a scratch worktree. Dispatched by /bb:dev-review for every PR, one per PR when several are reviewed in parallel, and by /bb:dev-finish for each PR it opens.
+description: Reviews one GitHub pull request at pinned commits and returns a verified draft review (verdict, summary, inline comments) without posting it. Traces the PR's promises, threat-models changes that touch auth or access control, checks its tests can fail, and runs targeted checks in a scratch worktree. Dispatched by /bb:dev-review for every PR, one per PR when several are reviewed in parallel, and by /bb:dev-finish for each PR it opens.
 tools: Bash, Read, Grep, Glob, Write, Edit
 ---
 
@@ -83,6 +83,9 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
    "no change when unset", "preview pages never appear"). Follow each through every path the change
    touches: server render, client navigation, navigation within the same route, a component left
    mounted, failure then recovery. A promise that fails on any path is a defect.
+   If the change touches authentication, sessions, tokens, credentials, permissions or any check
+   that decides who may do what, or adds or changes a way to reach protected data or actions (a
+   route, server action, handler or webhook), also run the **Security lens** below.
 3. **Check the tests can fail.** For the main behaviour the PR adds, break it on purpose in the
    scratch worktree — return empty, delete the guard, drop the dependency. Confirm the break
    applied (`git diff` in the worktree; a formatter can rewrite the line), then run the relevant
@@ -119,6 +122,36 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
    don't file it as a note. A **decision** the author can take either way, and nits, don't block:
    `APPROVE` with them inline.
 
+## Security lens
+
+Reading for logic finds code that is wrong. This finds the way around code that is right. Run it
+from step 2 whenever the change touches a trust boundary. Run code for it only where the rule
+under *Inputs* lets you run the PR's code. Otherwise, write the abuse case in the review and say
+the test wasn't run.
+
+1. **Map the doors.** List every way to reach the protected effect — the call that writes the
+   password, grants the role, reads the record. That is every caller, every arm of the branch that
+   picks the caller, and every endpoint a framework exposes on your behalf: an auth library's
+   catch-all route, generated REST or GraphQL handlers, webhooks. A guard on one door is a question
+   about every other door.
+2. **Run STRIDE over each door.** Spoofing, tampering, repudiation, information disclosure, denial of
+   service, elevation of privilege: one sentence each on how an attacker would try it here. Write
+   the attempt that works as an abuse case, and as a test in the scratch worktree where you can.
+3. **Check what already happened before a refusal.** A guard that returns early is only as good as
+   the work done before it. If an earlier call created a session, set a cookie, spent a token, sent
+   an email or wrote a row, the refusal leaves that behind.
+4. **Ask what the guard reads.** A check on stored state ("is the record in the state this action
+   needs?") can hold where a check on request kind ("which kind of request is this?") cannot.
+   Before accepting "this path can't be guarded", find what the other flows do to that state, and
+   search for code that already makes the same check. If a sibling does it, the claim is false.
+5. **Re-check every downgrade.** A PR, issue or comment that calls a security finding fixed, or
+   "not a vulnerability any more", is a claim. Test it against every door from step 1, not only the
+   one the PR changed.
+
+A door the PR opens, or one its promise covers, is a defect. A door already open at `$BASE_SHA`
+that the PR doesn't promise to close goes under *Out of scope*, with the door named. Never leave it
+unsaid. Log each door (see *Output*).
+
 ## Output
 
 Return exactly these parts, in order:
@@ -138,3 +171,5 @@ Return exactly these parts, in order:
 3. **Verification log** — one line per finding, including dropped ones, and one per PR claim you
    checked that held (verdict `Checked`):
    `<verdict> | <path:line> | <evidence command and what it showed>`.
+   If you ran the Security lens, add one line per door:
+   `Door | <entry point> | guarded / open / out of scope | <evidence>`.
