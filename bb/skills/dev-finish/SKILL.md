@@ -146,7 +146,8 @@ in the conversation).
   Linked issues are the ones this work targets; guidance is the user's, or none.
 - **Check the draft** before presenting it, as dev-review §2 says: re-run the
   evidence for every `Fabricated` and `Pre-existing` line in its verification
-  log, and for one `Real` line. If a check disagrees, fix the draft.
+  log, for one `Real` line, and, if the Security lens ran, for at least one
+  `Door | … | guarded` line. If a check disagrees, fix the draft.
 - **Present, don't post.** Show the user the draft's verdict, its blocking
   findings and its non-blocking ones. Never post it to GitHub — it's the author
   reviewing their own PR.
