@@ -154,7 +154,7 @@ Running the PR afterwards found three things that review could not have seen:
 
 - the new check ran inside a `try` after a call that had already created a session, and its `catch`
   returned early, so a thrown error left the session in place (a failure path in the new commits,
-  not in the reviewer's old thread);
+  not in the reviewer's old thread; the same refusal as item 2 of *Security lens* above);
 - the log line the description promised had no test (removing it failed nothing);
 - the "known limit" handed to the other issue was a live hole the issue still described wrongly.
 
