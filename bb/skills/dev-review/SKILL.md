@@ -171,6 +171,10 @@ order.
 - <finding> — needs a new result variant and UI handling
 ```
 
+A limit the PR hands to another issue ("known limit, tracked in #N") is out of scope only once you
+have read #N and it describes that limit. If you can't read it, say so; don't approve on the PR's
+word.
+
 If something out of scope genuinely should block, say why it cannot wait; otherwise it is a
 follow-up, and naming it as one is what keeps the PR reviewable.
 
@@ -200,7 +204,20 @@ gh pr view $N --repo $R --json mergeable,mergeStateStatus
 Don't approve over failing or pending required checks: say in the body what you are waiting on. A
 `CONFLICTING` PR runs little or no CI, so its green is not evidence. If the PR lists no checks at
 all, its base branch has no CI. In that case build and test `$HEAD_SHA` yourself in a scratch
-worktree before approving, or say plainly in the body that you didn't.
+worktree before approving, or, if you didn't, post `COMMENT` as below.
+
+**Can't see it? Don't approve.** Treat anything you could not see as pending, not passed:
+
+- CI you could not read (a 403, or no answer), or that has not finished;
+- a linked issue you could not open;
+- a PR that changes executable behaviour where the agent's body says it ran nothing (its steps 3–4
+  skipped), unless CI is readable, finished and green and ran the tests the change touches. That
+  counts as the run, which is how an outside contributor's PR gets approved.
+
+Post `"event":"COMMENT"` instead of `APPROVE`. A defect you did find still makes it
+`REQUEST_CHANGES`. Say exactly what you could not see or run, and the verdict you would give once
+it is checked. "Confirm CI is green before merging" inside an approval hands the
+check to whoever merges, and they will assume you did it.
 
 **Your own PR:** if `$AUTHOR` = `$ME`, GitHub rejects `APPROVE` and `REQUEST_CHANGES` with a 422.
 Post with `"event":"COMMENT"`, and have the body say which findings would block, since a comment
@@ -297,6 +314,10 @@ comments. `PUT` the original body so it stops calling its findings blocking, the
 `APPROVE` pinned to the same `commit_id` with a one-line body pointing at the threads above. GitHub
 counts each reviewer's latest review, so the old one stops blocking and its threads stay put. The
 same two calls clear a `CHANGES_REQUESTED` of yours that has outlived its fixes on a re-review.
+
+A blind `COMMENT` doesn't lift your `CHANGES_REQUESTED`: GitHub ignores `COMMENTED` reviews when it
+works out the decision. Leave the old body alone until you can approve, then post `APPROVE` as
+above.
 
 Worked examples of each rule failing in practice, with the commands that would have caught it:
 [`references/worked-examples.md`](references/worked-examples.md).

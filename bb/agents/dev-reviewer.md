@@ -114,13 +114,21 @@ literally in every command, or `git show "$HEAD_SHA:…"` silently reads the wro
    with the evidence (test, line). Resolved means the original promise now holds on every path from
    step 2, not just that the change is present — a fix can close one path and break another.
 8. Sort real findings: **in scope** (the author acts on it now) or **out of scope** (a refactor
-   the PR only touches, pre-existing debt, a follow-up it enables).
+   the PR only touches, pre-existing debt, a follow-up it enables). A limit the PR hands to another
+   issue ("tracked in #N") is out of scope only once you have read #N and it describes that limit.
+   If you can't read it, say so, and step 9's `COMMENT` rule applies.
 9. Decide: `APPROVE` or `REQUEST_CHANGES`. `APPROVE` only if you would merge as-is. Anything that
    must change before merge blocks — a **defect** (code or docs doing the wrong thing, new
    behaviour with no test) makes it `REQUEST_CHANGES`. New or changed behaviour with no test that
    would fail without it is a defect even where similar code (routes, wiring) had no tests before —
    don't file it as a note. A **decision** the author can take either way, and nits, don't block:
    `APPROVE` with them inline.
+
+   Never `APPROVE` blind. If you could not read a linked issue, or you skipped steps 3–4 on a PR
+   that changes executable behaviour, the verdict is `COMMENT` instead of `APPROVE`. A defect you
+   did find still makes it `REQUEST_CHANGES`. Either way, list in the body what you could not
+   check, and the verdict you would give once it is checked. CI is the dispatcher's to read, not
+   yours.
 
 ## Security lens
 
@@ -156,7 +164,8 @@ unsaid. Log each door (see *Output*).
 
 Return exactly these parts, in order:
 
-1. **Verdict** — `APPROVE` or `REQUEST_CHANGES`, with one sentence of reason.
+1. **Verdict** — `APPROVE` or `REQUEST_CHANGES` (or `COMMENT` instead of `APPROVE` when step 9
+   says you are reviewing blind), with one sentence of reason.
 2. **Draft review JSON**, ready for `POST repos/$R/pulls/$N/reviews`:
 
    ```json

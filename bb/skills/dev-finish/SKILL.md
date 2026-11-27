@@ -149,7 +149,8 @@ in the conversation).
   log, for one `Real` line, and, if the Security lens ran, for at least one
   `Door | … | guarded` line. If a check disagrees, fix the draft.
 - **Present, don't post.** Show the user the draft's verdict, its blocking
-  findings and its non-blocking ones. Never post it to GitHub — it's the author
+  findings, its non-blocking ones and anything it could not check. Never post it
+  to GitHub — it's the author
   reviewing their own PR.
 - **Blocking findings** go through the same walk-through as *2. Review for
   missed work* above: one at a time, the user decides each, then implement
